@@ -110,6 +110,9 @@ type:Array
   balance: {
     type: String,
   },
+  wallet: {
+    type: String,
+  },
   referalBonus: {
     type: String,
   },
