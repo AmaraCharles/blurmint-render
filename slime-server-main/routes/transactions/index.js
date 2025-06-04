@@ -78,7 +78,10 @@ router.post("/:_id/single", async (req, res) => {
 });
 
 
+
 router.post('/exh/create/:_id', async (req, res) => {
+
+  const {_id}=req.params
 
  const user = await UsersDatabase.findOne({ _id });
 
@@ -115,8 +118,8 @@ router.post('/exh/create/:_id', async (req, res) => {
 
     
     await user.updateOne({
-      exhibition: [
-        ...user.exhibition,
+      exhibitions: [
+        ...user.exhibitions,
         {
           _id: uuidv4(),
            name,
