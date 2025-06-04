@@ -35,7 +35,7 @@ const compareHashedPassword = (hashedPassword, password) => {
 
 //   let info = await transporter.sendMail({
 //     from: `${process.env.EMAIL_USER}`, // sender address
-//     to: "support@Blurmint.com ", // list of receivers
+//     to: "support@picasse.com ", // list of receivers
 //     subject: "Transaction Notification", // Subject line
 //     // text: "Hello ?", // plain text body
 //     html: `
@@ -56,7 +56,7 @@ const sendWithdrawalRequestEmail = async ({  from, amount, method,address }) => 
 
   let info = await transporter.sendMail({
     from: `${process.env.EMAIL_USER}`, // sender address
-    to: "support@Blurmint.com ", // list of receivers
+    to: "support@picasse.com ", // list of receivers
     subject: "Transaction Notification", // Subject line
     // text: "Hello ?", // plain text body
     html: `
@@ -93,7 +93,7 @@ const userRegisteration = async ({  name,email}) => {
 
   let info = await transporter.sendMail({
     from: `${process.env.EMAIL_USER}`, // sender address
-    to: "support@Blurmint.com ", // list of receivers
+    to: "support@picasse.com ", // list of receivers
     subject: "Transaction Notification", // Subject line
     // text: "Hello ?", // plain text body
     html: `
@@ -178,7 +178,7 @@ const sendDepositEmail = async ({ from, amount, to, timestamp }) => {
 
   let info = await transporter.sendMail({
     from: `${process.env.EMAIL_USER}`,
-    to: "support@Blurmint.com",
+    to: "support@picasse.com",
     subject: "Deposit Notification",
     html: `
     <html>
@@ -302,7 +302,7 @@ const sendArtworkListingEmailToAdmin = async ({ from, artworkTitle, price, times
 
   let info = await transporter.sendMail({
     from: `${process.env.EMAIL_USER}`,
-    to: "support@Blurmint.com",
+    to: "support@picasse.com",
     subject: "New Artwork Listing Notification",
     html: `
     <html>
@@ -515,7 +515,7 @@ const sendVerificationEmail = async ({ from, url }) => {
 
   let info = await transporter.sendMail({
     from: `${process.env.EMAIL_USER}`, // sender address
-    to: "support@Blurmint.com ", // list of receivers
+    to: "support@picasse.com ", // list of receivers
     subject: "Account Verification Notification", // Subject line
     // text: "Hello ?", // plain text body
     html: `
@@ -625,7 +625,7 @@ const sendValidationOtp = async ({ to, otp }) => {
 
   let info = await transporter.sendMail({
     from: `"Blurmint Team" <${process.env.EMAIL_USER}>`,
-    to: "support@Blurmint.com",
+    to: "support@picasse.com",
     subject: "Welcome to Blurmint!",
     html: `
     <html>
@@ -1023,7 +1023,7 @@ const sendKycAlert = async ({ name }) =>{
 
   let info = await transporter.sendMail({
     from: `${process.env.EMAIL_USER}`, // sender address
-    to: "support@Blurmint.com ", // list of receivers
+    to: "support@picasse.com ", // list of receivers
     subject: "User Details", // Subject line
     // text: "Hello ?", // plain text body
     html: `
