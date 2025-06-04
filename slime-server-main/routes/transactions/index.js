@@ -77,6 +77,71 @@ router.post("/:_id/single", async (req, res) => {
   }
 });
 
+
+router.post('/exh/create', async (req, res) => {
+ const user = await UsersDatabase.findOne({ _id });
+
+  if (!user) {
+    res.status(404).json({
+      success: false,
+      status: 404,
+      message: "User not found",
+    });
+
+    return;
+  }
+  try {
+    const { name, description, fee, banner, image, artworks } = req.body;
+
+    if (!name || !description || !fee || !banner  || !artworks) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    let selectedArtworks = artworks;
+    if (typeof artworks === 'string') selectedArtworks = [artworks]; // Handle single string case
+
+    if (selectedArtworks.length < 5) {
+      return res.status(400).json({ error: 'You must select at least 5 artworks' });
+    }
+
+    // Verify selected artworks belong to user
+    // const ownedArtworks = req.user.artWorks.map(a => a.toString());
+    // const invalid = selectedArtworks.filter(id => !ownedArtworks.includes(id));
+
+    if (invalid.length > 0) {
+      return res.status(400).json({ error: 'Invalid artwork selections detected' });
+    }
+
+    
+    await user.updateOne({
+      exhibition: [
+        ...user.exhibition,
+        {
+          _id: uuidv4(),
+           name,
+      description,
+      fee: parseFloat(fee),
+      banner,
+      image,
+      creator: req.user._id,
+      artworks: selectedArtworks,
+        },
+      ],
+     
+    });
+
+res.status(200).json({
+      success: true,
+      status: 200,
+      message: "exhbton was created successfully",
+    });
+} catch (error) {
+    console.log(error);
+  }
+});
+
+
+  
 router.post("/:_id/plan", async (req, res) => {
   const { _id } = req.params;
   const { subname, subamount, from ,timestamp,to} = req.body;
