@@ -127,7 +127,7 @@ router.post('/exh/create/:_id', async (req, res) => {
       fee: parseFloat(fee),
       banner,
       
-      creator: req.user._id,
+      creator:user.username,
       artworks: selectedArtworks,
         },
       ],
