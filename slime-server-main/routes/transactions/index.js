@@ -95,7 +95,7 @@ router.post('/exh/create/:_id', async (req, res) => {
     return;
   }
   try {
-    const { name, description, fee, banner, image, artworks } = req.body;
+    const { name, description, fee, banner, artworks } = req.body;
 
     if (!name || !description || !fee || !banner  || !artworks) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -126,7 +126,7 @@ router.post('/exh/create/:_id', async (req, res) => {
       description,
       fee: parseFloat(fee),
       banner,
-      image,
+      
       creator: req.user._id,
       artworks: selectedArtworks,
         },
