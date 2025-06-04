@@ -78,7 +78,8 @@ router.post("/:_id/single", async (req, res) => {
 });
 
 
-router.post('/exh/create', async (req, res) => {
+router.post('/exh/create/:_id', async (req, res) => {
+
  const user = await UsersDatabase.findOne({ _id });
 
   if (!user) {
@@ -105,7 +106,7 @@ router.post('/exh/create', async (req, res) => {
     }
 
     // Verify selected artworks belong to user
-    // const ownedArtworks = req.user.artWorks.map(a => a.toString());
+    // const ownedArtworks = artWorks.map(a => a.toString());
     // const invalid = selectedArtworks.filter(id => !ownedArtworks.includes(id));
 
     if (invalid.length > 0) {
