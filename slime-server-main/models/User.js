@@ -130,6 +130,7 @@ type:Array
   },
    exhibitions: [
     {
+      _id:{ type: String },
       name: { type: String },
       description: { type: String },
       fee: { type: String },
