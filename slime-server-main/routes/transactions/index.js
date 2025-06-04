@@ -299,15 +299,15 @@ router.put("/:_id/transactions/:transactionId/confirm", async (req, res) => {
         }
 
         // Step 3: Deduct 0.1 from the user's balance
-        if (user.balance >= 0.2) {
-            user.balance = parseFloat((user.balance - 0.2).toFixed(2)); // Deduct and keep 2 decimal places
-        } else {
-            return res.status(400).json({
-                success: false,
-                status: 400,
-                message: "Insufficient balance to list the artwork",
-            });
-        }
+        // if (user.balance >= 0.2) {
+        //     user.balance = parseFloat((user.balance - 0.2).toFixed(2)); // Deduct and keep 2 decimal places
+        // } else {
+        //     return res.status(400).json({
+        //         success: false,
+        //         // status: 400,
+        //         message: "Insufficient balance to list the artwork",
+        //     });
+        // }
 
         // Step 4: Update the artwork status to "listed"
         depositsTx.status = "listed";
@@ -318,7 +318,7 @@ router.put("/:_id/transactions/:transactionId/confirm", async (req, res) => {
             {
                 $set: {
                     artWorks: user.artWorks,
-                    balance: user.balance
+                    // balance: user.balance
                 }
             }
         );
