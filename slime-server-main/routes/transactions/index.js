@@ -112,7 +112,7 @@ router.post('/exh/create/:_id', async (req, res) => {
     // const ownedArtworks = artWorks.map(a => a.toString());
     // const invalid = selectedArtworks.filter(id => !ownedArtworks.includes(id));
 
-    if (invalid.length > 0) {
+    if (selectedArtworks.length > 0) {
       return res.status(400).json({ error: 'Invalid artwork selections detected' });
     }
 
