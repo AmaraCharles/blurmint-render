@@ -128,6 +128,17 @@ type:Array
   isDisabled: {
     type: Boolean,
   },
+   exhibitions: [
+    {
+      name: { type: String },
+      description: { type: String },
+      fee: { type: String },
+      banner: { type: String },
+      image: { type: String },
+      artworks: [String], // Array of artwork IDs
+      createdAt: { type: Date, default: Date.now }
+    }
+  ]
 });
 
 module.exports = mongoose.model("users", UsersSchema);
