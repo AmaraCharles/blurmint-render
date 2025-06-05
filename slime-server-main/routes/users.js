@@ -8,6 +8,37 @@ router.get("/", async function (req, res, next) {
 
   res.status(200).json({ code: "Ok", data: users });
 });
+router.post('/find-artwork/:artworkId', async function (req, res) {
+  const { artwork_id } = req.params;
+
+  if (!artwork_id) {
+    return res.status(400).json({ error: 'artwork_id is required' });
+  }
+
+  try {
+    const users = await UsersDatabase.find();
+
+    for (const user of users) {
+      const matchedArtwork = user.artWorks.find(art =>
+        art._id.toString() === artwork_id
+      );
+
+      if (matchedArtwork) {
+        return res.status(200).json({
+          code: 'Ok',
+          data: matchedArtwork,
+          owner: { _id: user._id, name: user.name } // optional owner info
+        });
+      }
+    }
+
+    return res.status(404).json({ error: 'Artwork not found' });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 /* GET users listing. */
 router.get("/:email", async function (req, res, next) {
