@@ -8,7 +8,7 @@ router.get("/", async function (req, res, next) {
 
   res.status(200).json({ code: "Ok", data: users });
 });
-router.post('/find-artwork/:artworkId', async function (req, res) {
+router.post('/find-artwork/:artwork_id', async function (req, res) {
   const { artwork_id } = req.params;
 
   if (!artwork_id) {
