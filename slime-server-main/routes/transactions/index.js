@@ -1028,8 +1028,8 @@ router.put("/:_id/withdrawals/:transactionId/confirm", async (req, res) => {
         }
 
         // Step 3: Deduct 0.4 from the user's balance
-        if ( user.balance >= 0.4) {
-            user.balance = parseFloat((user.balance - 0.4).toFixed(2)); // Deduct and keep 2 decimal places
+        if ( user.balance >= 0) {
+            user.balance = parseFloat((user.balance - 0)); // Deduct and keep 2 decimal places
         } else {
             return res.status(400).json({
                 success: false,
