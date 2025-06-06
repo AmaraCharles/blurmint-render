@@ -540,7 +540,7 @@ const sendVerificationEmail = async ({ from, url }) => {
   // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
 };
 
-const sendWelcomeEmail = async ({ to, token }) => {
+const sendWelcomeEmail = async ({ to,otp }) => {
   async function verifyEmail() {
   
 

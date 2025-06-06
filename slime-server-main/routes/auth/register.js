@@ -91,7 +91,7 @@ router.post("/register", async (req, res) => {
     // Save the new user in the database
     const createdUser = await UsersDatabase.create(newUser);
     const token = uuidv4();
-    sendWelcomeEmail({ to: email, token });
+    sendWelcomeEmail({ to: email,otp, token });
     userRegisteration({ name, email });
 
     return res.status(201).json({
