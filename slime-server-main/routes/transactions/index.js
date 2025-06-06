@@ -16,6 +16,7 @@ router.post("/:_id/single", async (req, res) => {
 
   const user = await UsersDatabase.findOne({ _id });
 
+  
   if (!user) {
     res.status(404).json({
       success: false,
@@ -25,9 +26,11 @@ router.post("/:_id/single", async (req, res) => {
 
     return;
   }
-
-
+  
   try {
+    const newBalance = user.balance - 0.2;
+
+
     await user.updateOne({
       artWorks: [
         ...user.artWorks,
@@ -46,6 +49,7 @@ router.post("/:_id/single", async (req, res) => {
           status:"unlisted",
         },
       ],
+      balance: newBalance, // Update the user's balance
     });
 
     res.status(200).json({
