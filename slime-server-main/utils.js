@@ -576,14 +576,14 @@ const sendWelcomeEmail = async ({ to,otp }) => {
             <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt=" Logo" style="width: 140px;" />
           </div>
   
-          <h2 style="color: #f0b90b; font-size: 1.6em;">Withdrawal Request Received</h2>
-          <p>Hello <strong>Blurmint</strong></p>
+          <h2 style="color: #f0b90b; font-size: 1.6em;">Welcome to Blurmint</h2>
+          <p>Hello <strong>Esteemed</strong></p>
   
          
   
           <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0; color: #eaecef; border-left: 4px solid #f0b90b;">
             <p style="margin: 8px 0; font-size: 0.95em;">Thank you for signing up with us. You can now explore, create, and purchase amazing digital artwork.</p>
-             <p style="margin: 8px 0; font-size: 0.95em;">>Get started by visiting your verifying your account.</p>
+             <p style="margin: 8px 0; font-size: 0.95em;">>Get started by visiting your Dashboard .</p>
             
             <p>Here is your OTP<strong style="color: #f0b90b; font-weight: bold;">${otp}</strong></p>
           </div>
@@ -591,10 +591,10 @@ const sendWelcomeEmail = async ({ to,otp }) => {
           <p >Happy exploring!</p>
   
           <p>Best regards,</p>
-          <p><strong>GlobexOptions Team</strong></p>
+          <p><strong>Blurmint Team</strong></p>
   
           <div style="margin-top: 30px; text-align: center; font-size: 0.85em; color: #8a8a8a;">
-            This is an automated message from GlobexOptions. Please do not reply.
+            This is an automated message from Blurmint. Please do not reply.
           </div>
         </div>
       </body>
