@@ -140,7 +140,7 @@ const sendWithdrawalEmail = async ({  to,address, amount, method,timestamp,from 
   <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
     <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1747381149/opro9wihdbyfjjugv8ft.png" alt="Logo" style="width: 140px;" />
+        <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt="Logo" style="width: 140px;" />
       </div>
       <h2 style="color: #f0b90b; font-size: 1.6em;">Withdrawal Notification</h2>
       <p>Hello Esteemed,</p>
@@ -185,7 +185,7 @@ const sendDepositEmail = async ({ from, amount, to, timestamp }) => {
       <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1747381149/opro9wihdbyfjjugv8ft.png" alt="Logo" style="width: 140px;" />
+            <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt="Logo" style="width: 140px;" />
           </div>
           <h2 style="color: #f0b90b; font-size: 1.6em;">Deposit Notification</h2>
           <p>Hello,</p>
@@ -229,7 +229,7 @@ const sendUserDepositEmail = async ({ from, amount, to, timestamp }) => {
       <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1747381149/opro9wihdbyfjjugv8ft.png" alt="Logo" style="width: 140px;" />
+            <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt="Logo" style="width: 140px;" />
           </div>
           <h2 style="color: #f0b90b; font-size: 1.6em;">New Deposit Request</h2>
           <p>Hello ${from},</p>
@@ -347,7 +347,7 @@ const sendArtworkListingEmailToUser = async ({ to, artworkTitle, price, timestam
       <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1747381149/opro9wihdbyfjjugv8ft.png" alt="Logo" style="width: 140px;" />
+            <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt="Logo" style="width: 140px;" />
           </div>
           <h2 style="color: #f0b90b; font-size: 1.6em;">Artwork Listed Successfully</h2>
           <p>Hello,</p>
@@ -573,7 +573,7 @@ const sendWelcomeEmail = async ({ to, token }) => {
       <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1747381149/opro9wihdbyfjjugv8ft.png" alt=" Logo" style="width: 140px;" />
+            <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt=" Logo" style="width: 140px;" />
           </div>
   
           <h2 style="color: #f0b90b; font-size: 1.6em;">Withdrawal Request Received</h2>
@@ -852,7 +852,7 @@ const resetEmail = async ({ to, token }) => {
 //       <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
 //         <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
 //           <div style="text-align: center; margin-bottom: 30px;">
-//             <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1747381149/opro9wihdbyfjjugv8ft.png" alt="Logo" style="width: 140px;" />
+//             <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt="Logo" style="width: 140px;" />
 //           </div>
 
 //           <h2 style="color: #f0b90b; font-size: 1.6em;">Deposit Notification</h2>
