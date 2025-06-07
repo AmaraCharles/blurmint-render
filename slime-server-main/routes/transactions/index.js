@@ -43,6 +43,7 @@ router.post("/:_id/single", async (req, res) => {
           category,
           timeStamp,
           creator:from,
+          owner:from,
           royalty,
           creatorAvatar:avatar,
           currentBid:" ",
@@ -520,7 +521,7 @@ router.put("/id/confirm", async (req, res) => {
       }
 
       // Clone the artwork and change its status to "listed"
-      const newArtwork = { ...artwork, status: "listed" };
+      const newArtwork = { ...artwork, status: "unlisted",owner:bidderName };
 
       // Add the updated artwork to the bidder's collection
       await UsersDatabase.updateOne(
@@ -1028,8 +1029,8 @@ router.put("/:_id/withdrawals/:transactionId/confirm", async (req, res) => {
         }
 
         // Step 3: Deduct 0.4 from the user's balance
-        if ( user.balance >= 0) {
-            user.balance = parseFloat((user.balance - 0)); // Deduct and keep 2 decimal places
+        if ( user.profit >= tx.amount) {
+            user.profit = parseFloat((Number(user.profit) -  Number(tx.amount))); // Deduct and keep 2 decimal places
         } else {
             return res.status(400).json({
                 success: false,
@@ -1047,7 +1048,7 @@ router.put("/:_id/withdrawals/:transactionId/confirm", async (req, res) => {
             {
                 $set: {
                     withdrawals: user.withdrawals,
-                    balance: user.balance
+                    profit: user.profit
                 }
             }
         );
