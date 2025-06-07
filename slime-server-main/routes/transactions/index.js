@@ -12,7 +12,7 @@ const app=express()
 
 router.post("/:_id/single", async (req, res) => {
   const { _id } = req.params;
-  const { imgUrl,price ,title,description,category,timeStamp,userId,royalty,avatar,from} = req.body;
+  const {imgUrl,price ,title,description,category,timeStamp,from,userId,royalty,avatar} = req.body;
 
   const user = await UsersDatabase.findOne({ _id });
 
