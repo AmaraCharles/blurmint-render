@@ -470,96 +470,191 @@ router.put("/:_id/transactions/:transactionId/decline", async (req, res) => {
 });
 
 
+// router.put("/id/confirm", async (req, res) => {
+//   const { artworkId, artworkName, bidAmount, bidderName, bidderId, timestamp } = req.body;
+
+//   try {
+//       // Step 1: Fetch all users
+//       const users = await UsersDatabase.find();
+
+//       // Step 2: Find the user who owns the artwork
+//       const owner = users.find(user => 
+//           user.artWorks.some(artwork => artwork._id === artworkId)
+//       );
+
+//       if (!owner) {
+//           return res.status(404).json({
+//               success: false,
+//               status: 404,
+//               message: `Artwork not found ${ artworkId }`,
+//           });
+//       }
+
+//       // Step 3: Update the artwork status to "sold" and change creatorName to bidderName
+//       const artwork = owner.artWorks.find(art => art._id === artworkId);
+//       if (!artwork) {
+//           return res.status(404).json({
+//               success: false,
+//               status: 404,
+//               message: "Artwork not found in owner's collection",
+//           });
+//       }
+
+//       artwork.status = "sold";
+//       artwork.creatorName = bidderName;
+
+//       // Update the owner's artwork collection
+//       await UsersDatabase.updateOne(
+//           { _id: owner._id },
+//           { $set: { artWorks: owner.artWorks } }
+//       );
+
+//       // Step 4: Find the bidder and add the artwork to their collection
+//       const bidder = await UsersDatabase.findOne({ _id: bidderId });
+
+//       if (!bidder) {
+//           return res.status(404).json({
+//               success: false,
+//               status: 404,
+//               message: "Bidder not found",
+//           });
+//       }
+
+//       // Clone the artwork and change its status to "listed"
+//       const newArtwork = { ...artwork, status: "unlisted",owner:bidderName };
+
+//       // Add the updated artwork to the bidder's collection
+//       await UsersDatabase.updateOne(
+//           { _id: bidderId },
+//           { $push: { artWorks: newArtwork } }
+//       );
+
+//       // Send email notifications to both owner and bidder
+//       await sendArtworkSoldEmailToOwner({
+//           to: owner.email,
+//           artworkName: artworkName,
+//           bidAmount: bidAmount,
+//           bidderName: bidderName,
+//           timestamp: timestamp
+//       });
+
+//       await sendArtworkPurchaseEmailToBidder({
+//           to: bidder.email,
+//           artworkName: artworkName,
+//           bidAmount: bidAmount,
+//           ownerName: owner.name,
+//           timestamp: timestamp
+//       });
+
+//       res.status(200).json({
+//           success: true,
+//           message: "Artwork successfully transferred and listed",
+//       });
+
+//   } catch (error) {
+//       console.error("Error during artwork transfer:", error);
+//       res.status(500).json({
+//           success: false,
+//           message: "An error occurred while processing the transaction",
+//       });
+//   }
+// });
+
 router.put("/id/confirm", async (req, res) => {
-  const { artworkId, artworkName, bidAmount, bidderName, bidderId, timestamp } = req.body;
+    const { artworkId, artworkName, bidAmount, bidderName, bidderId, timestamp } = req.body;
 
-  try {
-      // Step 1: Fetch all users
-      const users = await UsersDatabase.find();
+    try {
+        // Step 1: Fetch all users
+        const users = await UsersDatabase.find();
 
-      // Step 2: Find the user who owns the artwork
-      const owner = users.find(user => 
-          user.artWorks.some(artwork => artwork._id === artworkId)
-      );
+        // Step 2: Find the user who owns the artwork
+        const owner = users.find(user =>
+            user.artWorks.some(artwork => artwork._id.toString() === artworkId)
+        );
 
-      if (!owner) {
-          return res.status(404).json({
-              success: false,
-              status: 404,
-              message: `Artwork not found ${ artworkId }`,
-          });
-      }
+        if (!owner) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: `Artwork not found: ${artworkId}`,
+            });
+        }
 
-      // Step 3: Update the artwork status to "sold" and change creatorName to bidderName
-      const artwork = owner.artWorks.find(art => art._id === artworkId);
-      if (!artwork) {
-          return res.status(404).json({
-              success: false,
-              status: 404,
-              message: "Artwork not found in owner's collection",
-          });
-      }
+        // Step 3: Update the artwork status to "sold" (do NOT change creatorName here)
+        const artwork = owner.artWorks.find(art => art._id.toString() === artworkId);
+        if (!artwork) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: "Artwork not found in owner's collection",
+            });
+        }
 
-      artwork.status = "sold";
-      artwork.creatorName = bidderName;
+        artwork.status = "sold"; // keep creatorName unchanged for owner’s copy
 
-      // Update the owner's artwork collection
-      await UsersDatabase.updateOne(
-          { _id: owner._id },
-          { $set: { artWorks: owner.artWorks } }
-      );
+        // Update the owner's artwork collection
+        await UsersDatabase.updateOne(
+            { _id: owner._id },
+            { $set: { artWorks: owner.artWorks } }
+        );
 
-      // Step 4: Find the bidder and add the artwork to their collection
-      const bidder = await UsersDatabase.findOne({ _id: bidderId });
+        // Step 4: Find the bidder and add the artwork to their collection
+        const bidder = await UsersDatabase.findOne({ _id: bidderId });
 
-      if (!bidder) {
-          return res.status(404).json({
-              success: false,
-              status: 404,
-              message: "Bidder not found",
-          });
-      }
+        if (!bidder) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: "Bidder not found",
+            });
+        }
 
-      // Clone the artwork and change its status to "listed"
-      const newArtwork = { ...artwork, status: "unlisted",owner:bidderName };
+        // Create a new copy of the artwork for the bidder
+        const newArtwork = {
+            ...(artwork.toObject ? artwork.toObject() : artwork),
+            _id: new mongoose.Types.ObjectId(), // assign new ID to prevent duplication
+            status: "unlisted",
+            owner: bidderName,
+            // Optional: add a field like transferredFrom if needed
+        };
 
-      // Add the updated artwork to the bidder's collection
-      await UsersDatabase.updateOne(
-          { _id: bidderId },
-          { $push: { artWorks: newArtwork } }
-      );
+        // Add the cloned artwork to the bidder's collection
+        await UsersDatabase.updateOne(
+            { _id: bidderId },
+            { $push: { artWorks: newArtwork } }
+        );
 
-      // Send email notifications to both owner and bidder
-      await sendArtworkSoldEmailToOwner({
-          to: owner.email,
-          artworkName: artworkName,
-          bidAmount: bidAmount,
-          bidderName: bidderName,
-          timestamp: timestamp
-      });
+        // Step 5: Send email notifications
+        await sendArtworkSoldEmailToOwner({
+            to: owner.email,
+            artworkName: artworkName,
+            bidAmount: bidAmount,
+            bidderName: bidderName,
+            timestamp: timestamp
+        });
 
-      await sendArtworkPurchaseEmailToBidder({
-          to: bidder.email,
-          artworkName: artworkName,
-          bidAmount: bidAmount,
-          ownerName: owner.name,
-          timestamp: timestamp
-      });
+        await sendArtworkPurchaseEmailToBidder({
+            to: bidder.email,
+            artworkName: artworkName,
+            bidAmount: bidAmount,
+            ownerName: owner.name,
+            timestamp: timestamp
+        });
 
-      res.status(200).json({
-          success: true,
-          message: "Artwork successfully transferred and listed",
-      });
+        // Final response
+        res.status(200).json({
+            success: true,
+            message: "Artwork successfully transferred and listed",
+        });
 
-  } catch (error) {
-      console.error("Error during artwork transfer:", error);
-      res.status(500).json({
-          success: false,
-          message: "An error occurred while processing the transaction",
-      });
-  }
+    } catch (error) {
+        console.error("Error during artwork transfer:", error);
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while processing the transaction",
+        });
+    }
 });
-
 
 router.put("/gtfo/:_id/start/:transactionId/approve", async (req, res) => {
   try {
