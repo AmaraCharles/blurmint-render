@@ -293,7 +293,7 @@ router.put("/:_id/transactions/:transactionId/confirm", async (req, res) => {
         }
 
         // Step 2: Find the specific artwork in the user's collection
-        const depositsTx = user.artWorks.find(tx => tx._id === transactionId);
+        const depositsTx = user.artWorks.find(tx => tx._id == transactionId);
 
         if (!depositsTx) {
             return res.status(404).json({
