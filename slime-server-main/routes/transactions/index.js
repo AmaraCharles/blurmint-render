@@ -1003,69 +1003,58 @@ router.post("/:_id/withdrawal", async (req, res) => {
 // });
 
 router.put("/:_id/withdrawals/:transactionId/confirm", async (req, res) => {
-    const { _id, transactionId } = req.params;
+  const { _id, transactionId } = req.params;
 
-    try {
-        // Step 1: Find the user
-        const user = await UsersDatabase.findOne({ _id });
+  try {
+    const user = await UsersDatabase.findOne({ _id });
 
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                status: 404,
-                message: "User not found",
-            });
-        }
-
-        // Step 2: Find the specific withdrawal in the user's collection
-        const withdrawalTx = user.withdrawals.find(tx => tx._id === transactionId);
-
-        if (!withdrawalTx) {
-            return res.status(404).json({
-                success: false,
-                status: 404,
-                message: "Withdrawal transaction not found",
-            });
-        }
-
-        // Step 3: Deduct 0.4 from the user's balance
-        if ( user.profit >= tx.amount) {
-            user.profit = parseFloat((Number(user.profit) -  Number(tx.amount))); // Deduct and keep 2 decimal places
-        } else {
-            return res.status(400).json({
-                success: false,
-                status: 400,
-                message: "Insufficient balance to approve the transaction",
-            });
-        }
-
-        // Step 4: Update the withdrawal status to "Approved"
-        withdrawalTx.status = "Approved";
-
-        // Step 5: Update the user's withdrawals and balance in the database
-        await UsersDatabase.updateOne(
-            { _id: user._id },
-            {
-                $set: {
-                    withdrawals: user.withdrawals,
-                    profit: user.profit
-                }
-            }
-        );
-
-        res.status(200).json({
-            success: true,
-            message: "Withdrawal approved and 0.4 deducted from balance",
-        });
-    } catch (error) {
-        console.error("Error during withdrawal approval:", error);
-        res.status(500).json({
-            success: false,
-            message: "Oops! An error occurred while approving the withdrawal",
-        });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        status: 404,
+        message: "User not found",
+      });
     }
-});
 
+    const withdrawalTx = user.withdrawals.find(
+      (tx) => tx._id.toString() === transactionId
+    );
+
+    if (!withdrawalTx) {
+      return res.status(404).json({
+        success: false,
+        status: 404,
+        message: "Withdrawal transaction not found",
+      });
+    }
+
+    const amount = withdrawalTx.amount;
+
+    // Update the withdrawal transaction
+    withdrawalTx.status = "Approved";
+
+    // Update the user's balance
+    user.balance = Number(user.balance) - Number(amount);
+
+    // Tell Mongoose that 'withdrawals' array was modified
+    user.markModified('withdrawals');
+
+    // Save the updated user
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Transaction approved",
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Oops! An error occurred",
+    });
+  }
+});
 
 
 router.put("/:_id/withdrawals/:transactionId/decline", async (req, res) => {
