@@ -618,10 +618,10 @@ router.put("/id/confirm", async (req, res) => {
         }
 
         // Step 4.1: Subtract bidAmount from bidder's balance
-        const updatedBidderBalance = bidder.balance + bidAmount;
+        const updatedBidderBalance = bidder.balance - bidAmount;
 
         // Step 4.2: Add bidAmount to owner's profit (initialize if undefined)
-        const updatedOwnerProfit = (owner.profit || 0) - bidAmount;
+        const updatedOwnerProfit = (owner.profit || 0) + bidAmount;
 
         // Step 4.3: Update both users
         await UsersDatabase.updateOne(
