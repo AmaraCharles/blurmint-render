@@ -675,6 +675,51 @@ router.put("/id/confirm", async (req, res) => {
     }
 });
 
+router.put("/id/confirm/share", async (req, res) => {
+    const { artworkId, artworkName, bidAmount, bidderName, bidderId, timestamp } = req.body;
+
+    try {
+        // Step 1: Fetch all users
+        const users = await UsersDatabase.find();
+
+        // Step 2: Find the owner of the artwork
+        const owner = users.find(user =>
+            user.artWorks.some(art => art._id.toString() === artworkId)
+        );
+
+        if (!owner) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: `Artwork not found: ${artworkId}`,
+            });
+        }
+ owner.profit += bidAmount;
+
+       
+        // Update owner's artwork collection
+        await UsersDatabase.updateOne(
+            { _id: owner._id },
+            
+            { $set: { profit: owner.profit } }
+        );
+
+        
+        // Step 10: Respond
+        res.status(200).json({
+            success: true,
+            message: "Artwork successfully transferred, balance and profit updated",
+        });
+
+    } catch (error) {
+        console.error("Error during artwork transfer:", error);
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while processing the transaction",
+        });
+    }
+});
+
 router.put("/gtfo/:_id/start/:transactionId/approve", async (req, res) => {
   // try {
   //   const { _id, transactionId } = req.params;
