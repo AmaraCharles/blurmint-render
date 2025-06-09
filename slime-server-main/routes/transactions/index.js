@@ -695,18 +695,19 @@ router.put("/id/confirm/share", async (req, res) => {
             });
         }
 
-        // Step 3: Ensure bidAmount is a valid number
-        const numericBidAmount = parseFloat(bidAmount);
-        if (isNaN(numericBidAmount) || numericBidAmount <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid bid amount",
-            });
-        }
+       // Step 3: Clean and parse bidAmount
+const numericBidAmount = parseFloat(bidAmount.toString().replace(/[^0-9.]/g, ''));
+if (isNaN(numericBidAmount) || numericBidAmount <= 0) {
+    return res.status(400).json({
+        success: false,
+        message: "Invalid bid amount",
+    });
+}
 
-        // Step 4: Convert owner's profit to number safely
-        const currentProfit = parseFloat(owner.profit) || 0;
-        const updatedProfit = parseFloat(currentProfit + numericBidAmount);
+// Step 4: Clean and parse owner's profit
+const currentProfit = parseFloat(owner.profit?.toString().replace(/[^0-9.]/g, '')) || 0;
+const updatedProfit = currentProfit + numericBidAmount;
+
 
         // Step 5: Update owner's profit
         await UsersDatabase.updateOne(
