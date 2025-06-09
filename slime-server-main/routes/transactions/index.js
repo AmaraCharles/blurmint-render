@@ -706,7 +706,7 @@ router.put("/id/confirm/share", async (req, res) => {
 
         // Step 4: Initialize profit if not set
         const currentProfit = Number(owner.profit)
-        const updatedProfit = Number(currentProfit + numericBidAmount);
+        const updatedProfit = eval(currentProfit + numericBidAmount);
 
         // Step 5: Update owner's profit only
         await UsersDatabase.updateOne(
