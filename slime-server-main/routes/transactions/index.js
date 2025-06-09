@@ -567,9 +567,9 @@ router.put("/id/confirm", async (req, res) => {
         // Step 1: Fetch all users
         const users = await UsersDatabase.find();
 
-        // Step 2: Find the user who owns the artwork
+        // Step 2: Find the owner of the artwork
         const owner = users.find(user =>
-            user.artWorks.some(artwork => artwork._id.toString() === artworkId)
+            user.artWorks.some(art => art._id.toString() === artworkId)
         );
 
         if (!owner) {
@@ -580,7 +580,7 @@ router.put("/id/confirm", async (req, res) => {
             });
         }
 
-        // Step 3: Update the artwork status to "sold" (do NOT change creatorName here)
+        // Step 3: Mark the artwork as sold
         const artwork = owner.artWorks.find(art => art._id.toString() === artworkId);
         if (!artwork) {
             return res.status(404).json({
@@ -590,17 +590,16 @@ router.put("/id/confirm", async (req, res) => {
             });
         }
 
-        artwork.status = "sold"; // keep creatorName unchanged for owner’s copy
+        artwork.status = "sold"; // keep creatorName unchanged
 
-        // Update the owner's artwork collection
+        // Update owner's artwork collection
         await UsersDatabase.updateOne(
             { _id: owner._id },
             { $set: { artWorks: owner.artWorks } }
         );
 
-        // Step 4: Find the bidder and add the artwork to their collection
+        // Step 4: Find bidder
         const bidder = await UsersDatabase.findOne({ _id: bidderId });
-
         if (!bidder) {
             return res.status(404).json({
                 success: false,
@@ -609,42 +608,62 @@ router.put("/id/confirm", async (req, res) => {
             });
         }
 
-        // Create a new copy of the artwork for the bidder
+        // Step 5: Check and update bidder balance
+        if (bidder.balance < bidAmount) {
+            return res.status(400).json({
+                success: false,
+                message: "Insufficient balance to complete transaction",
+            });
+        }
+
+        bidder.balance -= bidAmount;
+
+        // Step 6: Update owner's profit
+        const ownerNewProfit = (owner.profit || 0) + bidAmount;
+
+        // Step 7: Create new artwork for bidder
         const newArtwork = {
             ...(artwork.toObject ? artwork.toObject() : artwork),
-            _id: new mongoose.Types.ObjectId(), // assign new ID to prevent duplication
+            _id: new mongoose.Types.ObjectId(),
             status: "unlisted",
-            owner: bidderName,
-            // Optional: add a field like transferredFrom if needed
+            owner: bidderName
         };
 
-        // Add the cloned artwork to the bidder's collection
+        // Step 8: Update both users in DB
         await UsersDatabase.updateOne(
             { _id: bidderId },
-            { $push: { artWorks: newArtwork } }
+            {
+                $set: { balance: bidder.balance },
+                $push: { artWorks: newArtwork }
+            }
         );
 
-        // Step 5: Send email notifications
+        await UsersDatabase.updateOne(
+            { _id: owner._id },
+            { $set: { profit: ownerNewProfit } }
+        );
+
+        // Step 9: Send emails
         await sendArtworkSoldEmailToOwner({
             to: owner.email,
-            artworkName: artworkName,
-            bidAmount: bidAmount,
-            bidderName: bidderName,
-            timestamp: timestamp
+            artworkName,
+            bidAmount,
+            bidderName,
+            timestamp
         });
 
         await sendArtworkPurchaseEmailToBidder({
             to: bidder.email,
-            artworkName: artworkName,
-            bidAmount: bidAmount,
+            artworkName,
+            bidAmount,
             ownerName: owner.name,
-            timestamp: timestamp
+            timestamp
         });
 
-        // Final response
+        // Step 10: Respond
         res.status(200).json({
             success: true,
-            message: "Artwork successfully transferred and listed",
+            message: "Artwork successfully transferred, balance and profit updated",
         });
 
     } catch (error) {
