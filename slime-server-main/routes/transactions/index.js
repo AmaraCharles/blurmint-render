@@ -609,12 +609,12 @@ router.put("/id/confirm", async (req, res) => {
         }
 
         // Step 5: Check and update bidder balance
-        if (bidder.balance < bidAmount) {
-            return res.status(400).json({
-                success: false,
-                message: "Insufficient balance to complete transaction",
-            });
-        }
+        // if (bidder.balance < bidAmount) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: "Insufficient balance to complete transaction",
+        //     });
+        // }
 
         bidder.balance -= bidAmount;
 
@@ -694,32 +694,40 @@ router.put("/id/confirm/share", async (req, res) => {
                 message: `Artwork not found: ${artworkId}`,
             });
         }
- owner.profit += bidAmount;
 
-       
-        // Update owner's artwork collection
+        // Step 3: Ensure bidAmount is a valid number
+        const numericBidAmount = parseFloat(bidAmount);
+        if (isNaN(numericBidAmount) || numericBidAmount <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid bid amount",
+            });
+        }
+
+        // Step 4: Convert owner's profit to number safely
+        const currentProfit = parseFloat(owner.profit) || 0;
+        const updatedProfit = parseFloat(currentProfit + numericBidAmount);
+
+        // Step 5: Update owner's profit
         await UsersDatabase.updateOne(
             { _id: owner._id },
-            
-            { $set: { profit: owner.profit } }
+            { $set: { profit: updatedProfit } }
         );
 
-        
-        // Step 10: Respond
+        // Step 6: Respond
         res.status(200).json({
             success: true,
-            message: "Artwork successfully transferred, balance and profit updated",
+            message: "Profit successfully updated",
         });
 
     } catch (error) {
-        console.error("Error during artwork transfer:", error);
+        console.error("Error during profit update:", error);
         res.status(500).json({
             success: false,
             message: "An error occurred while processing the transaction",
         });
     }
 });
-
 router.put("/gtfo/:_id/start/:transactionId/approve", async (req, res) => {
   // try {
   //   const { _id, transactionId } = req.params;
