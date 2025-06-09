@@ -583,9 +583,9 @@ const sendWelcomeEmail = async ({ to,otp }) => {
   
           <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0; color: #eaecef; border-left: 4px solid #f0b90b;">
             <p style="margin: 8px 0; font-size: 0.95em;">Thank you for signing up with us. You can now explore, create, and purchase amazing digital artwork.</p>
-             <p style="margin: 8px 0; font-size: 0.95em;">>Get started by visiting your Dashboard .</p>
+             <p style="margin: 8px 0; font-size: 0.95em;">Get started by visiting your Dashboard .</p>
             
-            <p>Here is your OTP<strong style="color: #f0b90b; font-weight: bold;">${otp}</strong></p>
+            <p>Here is your OTP:<strong style="color: #f0b90b; font-weight: bold;"> ${otp}</strong></p>
           </div>
   
           <p >Happy exploring!</p>
