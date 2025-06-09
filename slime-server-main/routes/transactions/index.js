@@ -709,7 +709,7 @@ if (isNaN(currentProfit) || isNaN(numericBidAmount)) {
     });
 }
 
-const updatedProfit = currentProfit + numericBidAmount;
+const updatedProfit = parseFloat(currentProfit + numericBidAmount);
 
 
         // Step 5: Update owner's profit
