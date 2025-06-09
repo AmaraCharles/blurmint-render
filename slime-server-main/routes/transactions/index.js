@@ -704,17 +704,17 @@ router.put("/id/confirm/share", async (req, res) => {
             });
         }
 
-        // Step 4: Initialize profit if not set
-        const currentProfit = Number(owner.profit)
-        const updatedProfit = eval(currentProfit + numericBidAmount);
+        // Step 4: Convert owner's profit to number safely
+        const currentProfit = Number(owner.profit) || 0;
+        const updatedProfit = currentProfit + numericBidAmount;
 
-        // Step 5: Update owner's profit only
+        // Step 5: Update owner's profit
         await UsersDatabase.updateOne(
             { _id: owner._id },
             { $set: { profit: updatedProfit } }
         );
 
-        // Step 6: Respond to client
+        // Step 6: Respond
         res.status(200).json({
             success: true,
             message: "Profit successfully updated",
@@ -728,7 +728,6 @@ router.put("/id/confirm/share", async (req, res) => {
         });
     }
 });
-
 router.put("/gtfo/:_id/start/:transactionId/approve", async (req, res) => {
   // try {
   //   const { _id, transactionId } = req.params;
