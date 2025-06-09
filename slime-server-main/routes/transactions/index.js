@@ -702,12 +702,12 @@ router.put("/id/confirm/share", async (req, res) => {
 const currentProfit = parseFloat(owner.profit);
 const numericBidAmount = parseFloat(bidAmount);
 
-if (isNaN(currentProfit) || isNaN(numericBidAmount)) {
-    return res.status(400).json({
-        success: false,
-        message: "Invalid number format in profit or bid amount",
-    });
-}
+// if (isNaN(currentProfit) || isNaN(numericBidAmount)) {
+//     return res.status(400).json({
+//         success: false,
+//         message: "Invalid number format in profit or bid amount",
+//     });
+// }
 
 const updatedProfit = parseFloat(currentProfit + numericBidAmount);
 
