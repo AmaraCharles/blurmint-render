@@ -105,7 +105,7 @@ type:Array
     type: String,
   },
   profit: {
-    type: String,
+    type: Number,
   },
   balance: {
     type: String,
