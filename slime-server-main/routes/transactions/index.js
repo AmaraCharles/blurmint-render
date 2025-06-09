@@ -580,7 +580,7 @@ router.put("/id/confirm", async (req, res) => {
             });
         }
 
-        // Step 3: Update the artwork status to "sold" (do NOT change creatorName here)
+        // Step 3: Update the artwork status to "sold"
         const artwork = owner.artWorks.find(art => art._id.toString() === artworkId);
         if (!artwork) {
             return res.status(404).json({
@@ -590,15 +590,15 @@ router.put("/id/confirm", async (req, res) => {
             });
         }
 
-        artwork.status = "sold"; // keep creatorName unchanged for owner’s copy
+        artwork.status = "sold"; // mark as sold
 
-        // Update the owner's artwork collection
+        // Update owner's artwork collection
         await UsersDatabase.updateOne(
             { _id: owner._id },
             { $set: { artWorks: owner.artWorks } }
         );
 
-        // Step 4: Find the bidder and add the artwork to their collection
+        // Step 4: Find the bidder
         const bidder = await UsersDatabase.findOne({ _id: bidderId });
 
         if (!bidder) {
@@ -609,39 +609,62 @@ router.put("/id/confirm", async (req, res) => {
             });
         }
 
-        // Create a new copy of the artwork for the bidder
+        // Check if bidder has enough balance
+        if (bidder.balance < bidAmount) {
+            return res.status(400).json({
+                success: false,
+                message: "Insufficient balance for bidder",
+            });
+        }
+
+        // Step 4.1: Subtract bidAmount from bidder's balance
+        const updatedBidderBalance = bidder.balance - bidAmount;
+
+        // Step 4.2: Add bidAmount to owner's profit (initialize if undefined)
+        const updatedOwnerProfit = (owner.profit || 0) + bidAmount;
+
+        // Step 4.3: Update both users
+        await UsersDatabase.updateOne(
+            { _id: bidderId },
+            { $set: { balance: updatedBidderBalance } }
+        );
+
+        await UsersDatabase.updateOne(
+            { _id: owner._id },
+            { $set: { profit: updatedOwnerProfit } }
+        );
+
+        // Step 5: Add the artwork to the bidder’s collection
         const newArtwork = {
             ...(artwork.toObject ? artwork.toObject() : artwork),
-            _id: new mongoose.Types.ObjectId(), // assign new ID to prevent duplication
+            _id: new mongoose.Types.ObjectId(),
             status: "unlisted",
             owner: bidderName,
-            // Optional: add a field like transferredFrom if needed
         };
 
-        // Add the cloned artwork to the bidder's collection
         await UsersDatabase.updateOne(
             { _id: bidderId },
             { $push: { artWorks: newArtwork } }
         );
 
-        // Step 5: Send email notifications
+        // Step 6: Send email notifications
         await sendArtworkSoldEmailToOwner({
             to: owner.email,
-            artworkName: artworkName,
-            bidAmount: bidAmount,
-            bidderName: bidderName,
-            timestamp: timestamp
+            artworkName,
+            bidAmount,
+            bidderName,
+            timestamp
         });
 
         await sendArtworkPurchaseEmailToBidder({
             to: bidder.email,
-            artworkName: artworkName,
-            bidAmount: bidAmount,
+            artworkName,
+            bidAmount,
             ownerName: owner.name,
-            timestamp: timestamp
+            timestamp
         });
 
-        // Final response
+        // Step 7: Respond
         res.status(200).json({
             success: true,
             message: "Artwork successfully transferred and listed",
@@ -655,6 +678,7 @@ router.put("/id/confirm", async (req, res) => {
         });
     }
 });
+
 
 router.put("/gtfo/:_id/start/:transactionId/approve", async (req, res) => {
   // try {
