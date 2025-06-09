@@ -705,7 +705,7 @@ router.put("/id/confirm/share", async (req, res) => {
         }
 
         // Step 4: Initialize profit if not set
-        const currentProfit = owner.profit || 0;
+        const currentProfit = Number(owner.profit)
         const updatedProfit = Number(currentProfit + numericBidAmount);
 
         // Step 5: Update owner's profit only
