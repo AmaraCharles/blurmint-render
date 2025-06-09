@@ -591,13 +591,18 @@ router.put("/id/confirm", async (req, res) => {
         }
 
         artwork.status = "sold"; // mark as sold
+  const updatedOwnerProfit = (owner.profit || 0) + bidAmount;
 
         // Update owner's artwork collection
+      
         await UsersDatabase.updateOne(
             { _id: owner._id },
             { $set: { artWorks: owner.artWorks } }
         );
-
+   await UsersDatabase.updateOne(
+            { _id: owner._id },
+            { $set: { profit: updatedOwnerProfit } }
+        );
         // Step 4: Find the bidder
         const bidder = await UsersDatabase.findOne({ _id: bidderId });
 
@@ -621,18 +626,14 @@ router.put("/id/confirm", async (req, res) => {
         const updatedBidderBalance = bidder.balance - bidAmount;
 
         // Step 4.2: Add bidAmount to owner's profit (initialize if undefined)
-        const updatedOwnerProfit = (owner.profit || 0) + bidAmount;
-
+      
         // Step 4.3: Update both users
         await UsersDatabase.updateOne(
             { _id: bidderId },
             { $set: { balance: updatedBidderBalance } }
         );
 
-        await UsersDatabase.updateOne(
-            { _id: owner._id },
-            { $set: { profit: updatedOwnerProfit } }
-        );
+       
 
         // Step 5: Add the artwork to the bidder’s collection
         const newArtwork = {
