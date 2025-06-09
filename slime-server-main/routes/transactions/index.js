@@ -657,53 +657,112 @@ router.put("/id/confirm", async (req, res) => {
 });
 
 router.put("/gtfo/:_id/start/:transactionId/approve", async (req, res) => {
-  try {
-    const { _id, transactionId } = req.params;
+  // try {
+  //   const { _id, transactionId } = req.params;
     
-    const user = await UsersDatabase.findOne({ _id });
+  //   const user = await UsersDatabase.findOne({ _id });
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        status: 404,
-        message: "User not found",
-      });
-    }
+  //   if (!user) {
+  //     return res.status(404).json({
+  //       success: false,
+  //       status: 404,
+  //       message: "User not found",
+  //     });
+  //   }
 
-    const depositsArray = user.transactions;
-    const depositsTx = depositsArray.find(tx => tx._id === transactionId);
+  //   const depositsArray = user.transactions;
+  //   const depositsTx = depositsArray.find(tx => tx._id === transactionId);
 
-    if (!depositsTx) {
-      return res.status(404).json({
-        success: false,
-        message: "Transaction not found"
-      });
-    }
+  //   if (!depositsTx) {
+  //     return res.status(404).json({
+  //       success: false,
+  //       message: "Transaction not found"
+  //     });
+  //   }
 
-    depositsTx.status = "Approved";
-    const newBalance = Number(user.balance) + Number(depositsTx.amount);
+  //   depositsTx.status = "Approved";
+  //   const newBalance = Number(user.balance) + Number(depositsTx.amount);
 
-    await UsersDatabase.findOneAndUpdate(
-      { _id },
-      {
-        $set: {
-          transactions: depositsArray,
-          balance: newBalance
-        }
-      },
-      { new: true }
-    );
+  //   await UsersDatabase.findOneAndUpdate(
+  //     { _id },
+  //     {
+  //       $set: {
+  //         transactions: depositsArray,
+  //         balance: newBalance
+  //       }
+  //     },
+  //     { new: true }
+  //   );
 
-    return res.status(200).json({
-      success: true,
-      message: "Transaction approved successfully"
+  //   return res.status(200).json({
+  //     success: true,
+  //     message: "Transaction approved successfully"
+  //   });
+
+  // } catch (error) {
+  //   console.error('Transaction approval error:', error);
+  //   return res.status(500).json({
+  //     success: false,
+  //     message: "An error occurred while processing the transaction"
+  //   });
+  // }
+  const { _id } = req.params;
+  const { transactionId } = req.params;
+  const { amount } = req.body;
+
+  const user = await UsersDatabase.findOne({ _id });
+
+  if (!user) {
+    res.status(404).json({
+      success: false,
+      status: 404,
+      message: "User not found",
     });
 
+    return;
+  }
+
+  try {
+    const depositsArray = user.transactions;
+    const depositsTx = depositsArray.filter(
+      (tx) => tx._id === transactionId
+    );
+
+    depositsTx[0].status = "Approved";
+    depositsTx[0].amount = amount;
+    
+    const newBalance = Number(user.balance) + Number(amount);
+
+
+    // console.log(withdrawalTx);
+
+    // const cummulativeWithdrawalTx = Object.assign({}, ...user.withdrawals, withdrawalTx[0])
+    // console.log("cummulativeWithdrawalTx", cummulativeWithdrawalTx);
+
+    await user.updateOne({
+      transactions: [
+        ...user.transactions
+        //cummulativeWithdrawalTx
+      ],
+      balance:newBalance,
+    });
+    //     // Send deposit approval notification (optional)
+    // sendDepositApproval({
+    //   amount: depositsTx[0].amount,
+    //   method: depositsTx[0].method,
+    //   timestamp: depositsTx[0].timestamp,
+    //   to: user.email, // assuming 'to' is the user's email or similar
+    // });
+
+
+    res.status(200).json({
+      message: "Transaction approved",
+    });
+
+    return;
   } catch (error) {
-    console.error('Transaction approval error:', error);
-    return res.status(500).json({
-      success: false,
-      message: "An error occurred while processing the transaction"
+    res.status(302).json({
+      message: "Opps! an error occured",
     });
   }
 });
