@@ -1129,7 +1129,7 @@ router.put("/:_id/withdrawals/:transactionId/confirm", async (req, res) => {
     withdrawalTx.status = "Approved";
 
     // Update the user's balance
-    user.balance = Number(user.balance) - Number(amount);
+    user.profit = Number(user.profit) - Number(amount);
 
     // Tell Mongoose that 'withdrawals' array was modified
     user.markModified('withdrawals');
