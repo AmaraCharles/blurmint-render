@@ -709,7 +709,7 @@ if (isNaN(currentProfit) || isNaN(numericBidAmount) || numericBidAmount <= 0) {
   });
 }
 
-// Step 5: Add using real numbers (avoid string concatenation)
+// Step 5: Add using real numbers (avoid string cncatenation)
 const updatedProfit = currentProfit + numericBidAmount;
 
 
