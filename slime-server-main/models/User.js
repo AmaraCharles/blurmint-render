@@ -105,10 +105,10 @@ type:Array
     type: String,
   },
   profit: {
-    type: String,
+    type: Number,
   },
   balance: {
-    type: String,
+    type: Number,
   },
   wallet: {
     type: String,

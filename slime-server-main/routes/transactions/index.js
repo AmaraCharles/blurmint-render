@@ -618,8 +618,7 @@ router.put("/id/confirm", async (req, res) => {
 
         bidder.balance -= bidAmount;
 
-        // Step 6: Update owner's profit
-        const ownerNewProfit = (owner.profit || 0) + bidAmount;
+
 
         // Step 7: Create new artwork for bidder
         const newArtwork = {
@@ -638,19 +637,16 @@ router.put("/id/confirm", async (req, res) => {
             }
         );
 
-        await UsersDatabase.updateOne(
-            { _id: owner._id },
-            { $set: { profit: ownerNewProfit } }
-        );
+      
 
-        // Step 9: Send emails
-        await sendArtworkSoldEmailToOwner({
-            to: owner.email,
-            artworkName,
-            bidAmount,
-            bidderName,
-            timestamp
-        });
+        // // Step 9: Send emails
+        // await sendArtworkSoldEmailToOwner({
+        //     to: owner.email,
+        //     artworkName,
+        //     bidAmount,
+        //     bidderName,
+        //     timestamp
+        // });
 
         await sendArtworkPurchaseEmailToBidder({
             to: bidder.email,
