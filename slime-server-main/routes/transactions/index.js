@@ -696,17 +696,21 @@ router.put("/id/confirm/share", async (req, res) => {
         }
 
         // Step 3: Ensure bidAmount is a valid number
-        const numericBidAmount = Number(bidAmount);
-        if (isNaN(numericBidAmount) || numericBidAmount <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid bid amount",
-            });
-        }
+       
 
-        // Step 4: Convert owner's profit to number safely
-        const currentProfit = Number(owner.profit) || 0;
-        const updatedProfit = currentProfit + numericBidAmount;
+      // Step 4: Convert owner's profit to number safely
+const currentProfit = parseFloat(owner.profit);
+const numericBidAmount = parseFloat(bidAmount);
+
+if (isNaN(currentProfit) || isNaN(numericBidAmount)) {
+    return res.status(400).json({
+        success: false,
+        message: "Invalid number format in profit or bid amount",
+    });
+}
+
+const updatedProfit = currentProfit + numericBidAmount;
+
 
         // Step 5: Update owner's profit
         await UsersDatabase.updateOne(
