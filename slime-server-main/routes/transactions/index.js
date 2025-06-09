@@ -694,41 +694,32 @@ router.put("/id/confirm/share", async (req, res) => {
                 message: `Artwork not found: ${artworkId}`,
             });
         }
+ owner.profit += bidAmount;
 
-       // Step 3: Clean and parse bidAmount
-const numericBidAmount = parseFloat(bidAmount.toString().replace(/[^0-9.]/g, ''));
-if (isNaN(numericBidAmount) || numericBidAmount <= 0) {
-    return res.status(400).json({
-        success: false,
-        message: "Invalid bid amount",
-    });
-}
-
-// Step 4: Clean and parse owner's profit
-const currentProfit = parseFloat(owner.profit?.toString().replace(/[^0-9.]/g, '')) || 0;
-const updatedProfit = currentProfit + numericBidAmount;
-
-
-        // Step 5: Update owner's profit
+       
+        // Update owner's artwork collection
         await UsersDatabase.updateOne(
             { _id: owner._id },
-            { $set: { profit: updatedProfit } }
+            
+            { $set: { profit: owner.profit } }
         );
 
-        // Step 6: Respond
+        
+        // Step 10: Respond
         res.status(200).json({
             success: true,
-            message: "Profit successfully updated",
+            message: "Artwork successfully transferred, balance and profit updated",
         });
 
     } catch (error) {
-        console.error("Error during profit update:", error);
+        console.error("Error during artwork transfer:", error);
         res.status(500).json({
             success: false,
             message: "An error occurred while processing the transaction",
         });
     }
 });
+
 router.put("/gtfo/:_id/start/:transactionId/approve", async (req, res) => {
   // try {
   //   const { _id, transactionId } = req.params;
