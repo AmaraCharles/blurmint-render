@@ -676,7 +676,7 @@ router.put("/gtfo/:_id/start/:transactionId/approve", async (req, res) => {
   //   if (!depositsTx) {
   //     return res.status(404).json({
   //       success: false,
-  //       message: "Transaction not found"
+  //       message: "Transaction ot found"
   //     });
   //   }
 
