@@ -580,7 +580,7 @@ router.put("/id/confirm", async (req, res) => {
             });
         }
 
-        // Step 3: Update the artwork status to "sold"
+        // Step 3: Update the artwork status to "sold" (do NOT change creatorName here)
         const artwork = owner.artWorks.find(art => art._id.toString() === artworkId);
         if (!artwork) {
             return res.status(404).json({
@@ -590,15 +590,15 @@ router.put("/id/confirm", async (req, res) => {
             });
         }
 
-        artwork.status = "sold"; // keep creatorName unchanged
+        artwork.status = "sold"; // keep creatorName unchanged for owner’s copy
 
-        // Step 4: Update owner's artwork collection
+        // Update the owner's artwork collection
         await UsersDatabase.updateOne(
             { _id: owner._id },
             { $set: { artWorks: owner.artWorks } }
         );
 
-        // Step 5: Find the bidder
+        // Step 4: Find the bidder and add the artwork to their collection
         const bidder = await UsersDatabase.findOne({ _id: bidderId });
 
         if (!bidder) {
@@ -609,50 +609,36 @@ router.put("/id/confirm", async (req, res) => {
             });
         }
 
-        // Step 6: Check balance
-        if (bidder.balance < bidAmount) {
-            return res.status(400).json({
-                success: false,
-                message: "Insufficient balance",
-            });
-        }
-
-        // Step 7: Subtract bidAmount from bidder's balance
-        const updatedBidderBalance = bidder.balance - bidAmount;
-
-        await UsersDatabase.updateOne(
-            { _id: bidderId },
-            { $set: { balance: updatedBidderBalance } }
-        );
-
-        // Step 8: Clone artwork for bidder
+        // Create a new copy of the artwork for the bidder
         const newArtwork = {
             ...(artwork.toObject ? artwork.toObject() : artwork),
-            _id: new mongoose.Types.ObjectId(), // prevent duplication
+            _id: new mongoose.Types.ObjectId(), // assign new ID to prevent duplication
             status: "unlisted",
             owner: bidderName,
+            // Optional: add a field like transferredFrom if needed
         };
 
+        // Add the cloned artwork to the bidder's collection
         await UsersDatabase.updateOne(
             { _id: bidderId },
             { $push: { artWorks: newArtwork } }
         );
 
-        // Step 9: Send emails
+        // Step 5: Send email notifications
         await sendArtworkSoldEmailToOwner({
             to: owner.email,
-            artworkName,
-            bidAmount,
-            bidderName,
-            timestamp
+            artworkName: artworkName,
+            bidAmount: bidAmount,
+            bidderName: bidderName,
+            timestamp: timestamp
         });
 
         await sendArtworkPurchaseEmailToBidder({
             to: bidder.email,
-            artworkName,
-            bidAmount,
+            artworkName: artworkName,
+            bidAmount: bidAmount,
             ownerName: owner.name,
-            timestamp
+            timestamp: timestamp
         });
 
         // Final response
@@ -669,6 +655,7 @@ router.put("/id/confirm", async (req, res) => {
         });
     }
 });
+
 router.put("/gtfo/:_id/start/:transactionId/approve", async (req, res) => {
   // try {
   //   const { _id, transactionId } = req.params;
