@@ -715,6 +715,14 @@ const updatedProfit = currentProfit + numericBidAmount;
             { $set: { profit: updatedProfit } }
         );
 
+        await sendArtworkSoldEmailToOwner({
+            to: owner.email,
+            artworkName,
+            bidAmount,
+            bidderName,
+            timestamp
+        });
+
         // Step 6: Respond
         res.status(200).json({
             success: true,
