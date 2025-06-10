@@ -849,6 +849,32 @@ router.put("/gtfo/:_id/start/:transactionId/approve", async (req, res) => {
 });
    
    
+router.delete("/gtfo/:_id/start/:transactionId/delete", async function (req, res) {
+  const { _id, transactionId } = req.params;
+
+  try {
+    const user = await UsersDatabase.findOne({ _id });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Filter out the artwork to delete
+    const updatedArtWorks = user.artWorks.filter(
+      (art) => art._id.toString() !== transactionId
+    );
+
+    // Update the user's artworks array
+    user.artWorks = updatedArtWorks;
+    await user.save();
+
+    return res.status(200).json({ code: "Ok", message: "Artwork deleted" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
 router.put("/gtfo/:_id/start/:transactionId/decline", async (req, res) => {
   try {
     const { _id, transactionId } = req.params;
