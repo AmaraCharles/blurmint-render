@@ -952,13 +952,28 @@ router.put('/art/:_id/:transactionId', async (req, res) => {
     const user = await UsersDatabase.findOne({ _id: userId });
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-    // Find the artwork within the user's artworks array
-    const artwork = user.artWorks.find(item => item._id.toString() == transactionId);
-    if (!artwork) return res.status(404).json({ success: false, message: 'Artwork not found' });
+    // Find index of the artwork in the array
+    const index = user.artWorks.findIndex(item => item._id.toString() === transactionId);
+    if (index === -1) {
+      return res.status(404).json({ success: false, message: 'Artwork not found' });
+    }
 
-   artwork.set({ from, title, price, imgUrl, category, collection, views, description, status });
-user.markModified('artWorks');
-await user.save();
+    // Replace the artwork at the found index with updated values
+    user.artWorks[index] = {
+      ...user.artWorks[index]._doc, // preserve untouched fields
+      from,
+      title,
+      price,
+      imgUrl,
+      category,
+      collection,
+      views,
+      description,
+      status
+    };
+
+    // Save the updated user document
+    await user.save();
 
     res.status(200).json({ success: true, message: 'Artwork updated successfully' });
   } catch (error) {
