@@ -164,7 +164,7 @@ router.put("/:_id/profile/update", upload.none(), async (req, res) => {
 
     if (req.body.socials) {
       try {
-        updateData.socials = JSON.parse(req.body.socials); // 🔥 Parse JSON string
+        updateData.socialUsernames = JSON.parse(req.body.socials); // 🔥 Parse JSON string
       } catch (e) {
         console.error("Invalid socials JSON:", e);
       }
