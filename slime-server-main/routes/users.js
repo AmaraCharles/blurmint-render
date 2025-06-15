@@ -103,6 +103,7 @@ router.put("/:_id/profile/update", async function (req, res) {
     if (req.body.username) updateData.username = req.body.username;
     if (req.body.email) updateData.email = req.body.email;
     if (req.body.bio) updateData.bio = req.body.bio;
+    if (req.body.url) updateData.creatorAvatar = req.body.url;
     
     // Handle social media links if provided as a JSON string
     if (req.body.socials) {
