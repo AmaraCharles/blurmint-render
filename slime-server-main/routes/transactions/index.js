@@ -956,11 +956,10 @@ router.put('/art/:_id/:transactionId', async (req, res) => {
     const artwork = user.artWorks.find(item => item._id.toString() == transactionId);
     if (!artwork) return res.status(404).json({ success: false, message: 'Artwork not found' });
 
-    // Update artwork details
-    Object.assign(artwork, { from, title, price, imgUrl, category, collection, views, description, status });
+   artwork.set({ from, title, price, imgUrl, category, collection, views, description, status });
+user.markModified('artWorks');
+await user.save();
 
-    // Save the updated user document
-    await user.save();
     res.status(200).json({ success: true, message: 'Artwork updated successfully' });
   } catch (error) {
     console.error('Error updating artwork:', error.message || error);
