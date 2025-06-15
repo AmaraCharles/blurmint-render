@@ -1,5 +1,8 @@
 var express = require("express");
 const UsersDatabase = require("../models/User");
+const multer = require('multer');
+const upload = multer(); // ← this line is REQUIRED
+
 const { hashPassword } = require("../utils");
 var router = express.Router();
 
