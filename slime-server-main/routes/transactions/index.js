@@ -953,7 +953,7 @@ router.put('/art/:_id/:transactionId', async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
     // Find the artwork within the user's artworks array
-    const artwork = user.artWorks.find(item => item._id.toString() === transactionId);
+    const artwork = user.artWorks.find(item => item._id.toString() == transactionId);
     if (!artwork) return res.status(404).json({ success: false, message: 'Artwork not found' });
 
     // Update artwork details
