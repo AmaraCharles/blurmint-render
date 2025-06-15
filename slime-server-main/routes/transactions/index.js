@@ -940,13 +940,24 @@ router.get('/art/:_id/:transactionId', async (req, res) => {
 // Update Artwork Details
 const mongoose = require('mongoose');
 
-router.put('/art/:_id/:transactionId', async (req, res) => {
-  const { _id, transactionId } = req.params;
-  const { from, title, price, imgUrl, category, collection, views, description, status } = req.body;
+router.put('/art/:_idd/:transactionId', async (req, res) => {
+  const { _idd, transactionId } = req.params;
+  const {_id, image,
+          price ,
+          title,
+          description,
+          category,
+          timeStamp,
+          creator,
+          owner,
+          royalty,
+          creatorAvatar,
+          currentBid,
+          status}=req.body
 
   try {
     // Convert the _id to an ObjectId if needed
-    const userId = mongoose.Types.ObjectId.isValid(_id) ? mongoose.Types.ObjectId(_id) : _id;
+    const userId = mongoose.Types.ObjectId.isValid(_idd) ? mongoose.Types.ObjectId(_id) : _idd;
 
     // Find the user by ID
     const user = await UsersDatabase.findOne({ _id: userId });
@@ -961,15 +972,19 @@ router.put('/art/:_id/:transactionId', async (req, res) => {
     // Replace the artwork at the found index with updated values
     user.artWorks[index] = {
       ...user.artWorks[index]._doc, // preserve untouched fields
-      from,
-      title,
-      price,
-      imgUrl,
-      category,
-      collection,
-      views,
-      description,
-      status
+     _id, image,
+          price ,
+          title,
+          description,
+          category,
+          timeStamp,
+          creator,
+          owner,
+          royalty,
+          creatorAvatar,
+          currentBid,
+          status
+
     };
 
     // Save the updated user document
