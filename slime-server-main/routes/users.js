@@ -108,10 +108,10 @@ router.put("/:_id/profile/update", async function (req, res) {
     // Handle social media links if provided as a JSON string
     if (req.body.socials) {
       try {
-        const socialsData = typeof req.body.socials === 'string' 
+        const socialsData = typeof req.body.socials == 'string' 
           ? JSON.parse(req.body.socials)
           : req.body.socials;
-        updateData.socials = socialsData;
+        updateData.socialUsernames = socialsData;
       } catch (error) {
         console.error('Error parsing socials data:', error);
       }
