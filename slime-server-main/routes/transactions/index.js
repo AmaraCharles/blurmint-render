@@ -957,7 +957,7 @@ router.put('/art/:_idd/:transactionId', async (req, res) => {
 
   try {
     // Convert the _id to an ObjectId if needed
-    const userId = mongoose.Types.ObjectId.isValid(_idd) ? mongoose.Types.ObjectId(_id) : _idd;
+    const userId = mongoose.Types.ObjectId.isValid(_idd) ? mongoose.Types.ObjectId(_idd) : _idd;
 
     // Find the user by ID
     const user = await UsersDatabase.findOne({ _id: userId });
