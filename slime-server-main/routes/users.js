@@ -84,60 +84,100 @@ router.delete("/:email/delete", async function (req, res, next) {
   res.status(200).json({ code: "Ok" });
 });
 
-router.put("/:_id/profile/update", async function (req, res) {
+// router.put("/:_id/profile/update", upload.none(), async function (req, res) {
+//   const { _id } = req.params;
+//    console.log('Parsed form data:', req.body); // 🎯 Your form fields are here
+//   console.log('Socials:', req.body.socials);  // ⚠️ Still a string! Parse it if needed
+
+//   try {
+//     // First find the user to ensure they exist
+//     const existingUser = await UsersDatabase.findById(_id);
+
+//     if (!existingUser) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     // Parse the request body
+//     const updateData = {};
+    
+//     // Handle basic fields
+//     if (req.body.name) updateData.name = req.body.name;
+//     if (req.body.username) updateData.username = req.body.username;
+//     if (req.body.email) updateData.email = req.body.email;
+//     if (req.body.bio) updateData.bio = req.body.bio;
+//     if (req.body.url) updateData.creatorAvatar = req.body.url;
+    
+//     // Handle social media links if provided as a JSON string
+//     if (req.body.socials) {
+//       try {
+//         const socialsData = typeof req.body.socials == 'string' 
+//           ? JSON.parse(req.body.socials)
+//           : req.body.socials;
+//         updateData.socialUsernames = socialsData;
+//       } catch (error) {
+//         console.error('Error parsing socials data:', error);
+//       }
+//     }
+
+//     // Update the user document with validated data
+//     await existingUser.updateOne(
+//       { $set: updateData },
+//       { runValidators: true }
+//     );
+
+//     // Fetch the updated user to return in response
+//     const updatedUser = await UsersDatabase.findById(_id);
+
+//     return res.status(200).json({
+//       message: "Update was successful",
+//       data: updatedUser,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({
+//       message: "Internal server error",
+//       error: error.message,
+//     });
+//   }
+// });
+
+router.put("/:_id/profile/update", upload.none(), async (req, res) => {
   const { _id } = req.params;
 
+  console.log('Parsed form data:', req.body); // 🎯 Your form fields are here
+  console.log('Socials:', req.body.socials);  // ⚠️ Still a string! Parse it if needed
+
   try {
-    // First find the user to ensure they exist
     const existingUser = await UsersDatabase.findById(_id);
+    if (!existingUser) return res.status(404).json({ message: "User not found" });
 
-    if (!existingUser) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    const updateData = {
+      name: req.body.name,
+      username: req.body.username,
+      email: req.body.email,
+      bio: req.body.bio,
+      creatorAvatar: req.body.url
+    };
 
-    // Parse the request body
-    const updateData = {};
-    
-    // Handle basic fields
-    if (req.body.name) updateData.name = req.body.name;
-    if (req.body.username) updateData.username = req.body.username;
-    if (req.body.email) updateData.email = req.body.email;
-    if (req.body.bio) updateData.bio = req.body.bio;
-    if (req.body.url) updateData.creatorAvatar = req.body.url;
-    
-    // Handle social media links if provided as a JSON string
     if (req.body.socials) {
       try {
-        const socialsData = typeof req.body.socials == 'string' 
-          ? JSON.parse(req.body.socials)
-          : req.body.socials;
-        updateData.socialUsernames = socialsData;
-      } catch (error) {
-        console.error('Error parsing socials data:', error);
+        updateData.socials = JSON.parse(req.body.socials); // 🔥 Parse JSON string
+      } catch (e) {
+        console.error("Invalid socials JSON:", e);
       }
     }
 
-    // Update the user document with validated data
-    await existingUser.updateOne(
-      { $set: updateData },
-      { runValidators: true }
-    );
+    await existingUser.updateOne({ $set: updateData }, { runValidators: true });
 
-    // Fetch the updated user to return in response
     const updatedUser = await UsersDatabase.findById(_id);
+    return res.status(200).json({ message: "Update successful", data: updatedUser });
 
-    return res.status(200).json({
-      message: "Update was successful",
-      data: updatedUser,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: "Internal server error",
-      error: error.message,
-    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Internal server error", error: err.message });
   }
 });
+
 router.put("/:_id/profile/update/admin", async function (req, res) {
   const { _id } = req.params;
 
