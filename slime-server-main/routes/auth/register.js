@@ -1,5 +1,5 @@
 var express = require("express");
-var { hashPassword,sendPasswordOtp,userRegisteration,sendValidationOtp, sendWelcomeEmail,resendWelcomeEmail,resetEmail, sendUserDetails, userRegisteration } = require("../../utils");
+var { hashPassword,sendPasswordOtp,userRegisteration,sendValidationOtp,sendRegOtp, sendWelcomeEmail,resendWelcomeEmail,resetEmail, sendUserDetails, userRegisteration } = require("../../utils");
 const UsersDatabase = require("../../models/User");
 var router = express.Router();
 const { v4: uuidv4 } = require("uuid");
@@ -334,6 +334,10 @@ router.post("/register/validate/resend", async (req, res) => {
 router.post("/register/resend", async (req, res) => {
   const { email } = req.body;
   const user = await UsersDatabase.findOne({ email });
+  const otp = speakeasy.totp({
+    secret: process.env.SECRET_KEY, // Secure OTP generation
+    encoding: "base32",
+  });
 
   if (!user) {
     res.status(404).json({
@@ -345,15 +349,19 @@ router.post("/register/resend", async (req, res) => {
     return;
   }
 
+  const otpExpiration = Date.now() + (5 * 60 * 1000); // 5 minutes in milliseconds
+
   try {
     
     res.status(200).json({
       success: true,
       status: 200,
       message: "OTP resent successfully",
+      otp:otp,
+      otpExpiration: otpExpiration,
     });
     
- sendPasswordOtp({to:req.body.email})
+ sendRegOtp({to:req.body.email,otp})
    
     // sendUserDetails({
     //   to:req.body.email
