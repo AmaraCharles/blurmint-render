@@ -964,7 +964,7 @@ router.put('/art/:_idd/:transactionId', async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
     // Find index of the artwork in the array
-    const index = user.artWorks.findIndex(item => item._id.toString() === transactionId);
+    const index = user.artWorks.findIndex(item => item._id.toString() == transactionId);
     if (index === -1) {
       return res.status(404).json({ success: false, message: 'Artwork not found' });
     }
