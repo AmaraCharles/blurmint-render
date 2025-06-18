@@ -927,7 +927,7 @@ router.get('/art/:_id/:transactionId', async (req, res) => {
       const user =  await UsersDatabase.findOne({ _id });
       if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
-      const artwork = user.artWorks.find(item => item._id === transactionId);
+      const artwork = user.artWorks.find(item => item._id == transactionId);
       if (!artwork) return res.status(404).json({ success: false, message: 'Artwork not found' });
 
       res.status(200).json({ success: true, data: artwork });
