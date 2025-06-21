@@ -28,7 +28,7 @@ router.post("/:_id/single", async (req, res) => {
   }
   
   try {
-    const newBalance = user.balance - 0.2;
+    const newBalance = user.balance - 0.25;
 
 
     await user.updateOne({
