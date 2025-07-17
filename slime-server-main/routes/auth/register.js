@@ -23,7 +23,7 @@ function generateReferralCode(length) {
 
 
 router.post("/register", async (req, res) => {
-  const { name, username, email, password, wallet } = req.body;
+  const { name, username, email, password, wallet,referralCode } = req.body;
 // Generate OTP
   const otp = speakeasy.totp({
     secret: process.env.SECRET_KEY, // Secure OTP generation
