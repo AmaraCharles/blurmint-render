@@ -97,6 +97,7 @@ router.post("/register", async (req, res) => {
       password: hashedPassword,
       transactions: [],
       withdrawals: [],
+      referredUsers:[],
        referralCode: generateReferralCode(6), // Generate a referral code for the new user
       referredBy:null,
       verify: "pending"
