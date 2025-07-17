@@ -67,6 +67,18 @@ router.post("/register", async (req, res) => {
       throw new Error("Password hashing failed");
     }
 
+     // Find the referrer based on the provided referral code
+    let referrer = null;
+    
+    if (referralCode) {
+      referrer = await UsersDatabase.findOne({ referralCode });
+      if (!referrer) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid referral code",
+        });
+      }
+    }
     // Create a new user object
     const newUser = {
       name,
@@ -85,9 +97,16 @@ router.post("/register", async (req, res) => {
       password: hashedPassword,
       transactions: [],
       withdrawals: [],
+       referralCode: generateReferralCode(6), // Generate a referral code for the new user
+      referredBy:null,
       verify: "pending"
     };
 
+     if (referrer) {
+      newUser.referredBy=referrer.firstName;
+      referrer.referredUsers.push(newUser.firstName);
+      await referrer.save();
+    }
     // Save the new user in the database
     const createdUser = await UsersDatabase.create(newUser);
     const token = uuidv4();
