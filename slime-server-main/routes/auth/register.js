@@ -8,7 +8,7 @@ const speakeasy = require('speakeasy');
 const secret = speakeasy.generateSecret({ length: 4 });
 
 
-// Function to generate a referral code
+// Function to generate a random referral code
 function generateReferralCode(length) {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let code = "";
@@ -21,10 +21,24 @@ function generateReferralCode(length) {
   return code;
 }
 
+// Function to ensure referral codes are unique in the database
+async function getUniqueReferralCode(length = 6) {
+  let code;
+  let exists = true;
 
+  while (exists) {
+    code = generateReferralCode(length);
+    exists = await UsersDatabase.findOne({ referralCode: code });
+  }
+
+  return code;
+}
+
+// User registration endpoint
 router.post("/register", async (req, res) => {
-  const { name, username, email, password, wallet,referralCode } = req.body;
-// Generate OTP
+  const { name, username, email, password, wallet, referralCode } = req.body;
+
+  // Generate OTP
   const otp = speakeasy.totp({
     secret: process.env.SECRET_KEY, // Secure OTP generation
     encoding: "base32",
@@ -33,7 +47,7 @@ router.post("/register", async (req, res) => {
   // Set OTP expiration time (5 minutes from now)
   const otpExpiration = Date.now() + (5 * 60 * 1000); // 5 minutes in milliseconds
 
-
+  // NFT artworks for random avatar assignment
   const nftArtworks = [
     { title: "Bored Ape #148", url: "https://ipfs.io/ipfs/QmQ6VgRFiVTdKbiebxGvhW3Wa3Lkhpe6SkWBPjGnPkTttS/1484.png" },
     { title: "Bored Ape #3547", url: "https://ipfs.io/ipfs/QmQ6VgRFiVTdKbiebxGvhW3Wa3Lkhpe6SkWBPjGnPkTttS/3547.png" },
@@ -49,7 +63,6 @@ router.post("/register", async (req, res) => {
   try {
     // Check if the user already exists
     const existingUser = await UsersDatabase.findOne({ email });
-
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -61,15 +74,14 @@ router.post("/register", async (req, res) => {
     const avatar = getRandomNFT();
     console.log("Assigned Avatar:", avatar);
 
-    // Hash the password (assuming the function exists and works correctly)
+    // Hash the password (assuming hashPassword function exists)
     const hashedPassword = hashPassword(password);
     if (!hashedPassword) {
       throw new Error("Password hashing failed");
     }
 
-     // Find the referrer based on the provided referral code
+    // Validate referral code if provided
     let referrer = null;
-    
     if (referralCode) {
       referrer = await UsersDatabase.findOne({ referralCode });
       if (!referrer) {
@@ -79,6 +91,7 @@ router.post("/register", async (req, res) => {
         });
       }
     }
+
     // Create a new user object
     const newUser = {
       name,
@@ -90,44 +103,52 @@ router.post("/register", async (req, res) => {
       collections: [],
       balance: 0,
       profit: 0,
-      bio:"",
+      bio: "",
       socials: {},
       verification: [],
       socialUsernames: [],
       password: hashedPassword,
       transactions: [],
       withdrawals: [],
-      referredUsers:[],
-       referralCode: generateReferralCode(6), // Generate a referral code for the new user
-      referredBy:null,
+      referredUsers: [],
+      referralCode: await getUniqueReferralCode(6), // Generate unique referral code
+      referredBy: null,
       verify: "pending"
     };
 
-     if (referrer) {
-      newUser.referredBy=referrer.firstName;
-      referrer.referredUsers.push(newUser.firstName);
+    // If user was referred, update the referrer's referredUsers list
+    if (referrer) {
+      newUser.referredBy = referrer.username; // store username of referrer
+      referrer.referredUsers.push(newUser.username); // add new user's username to referrer
       await referrer.save();
     }
+
     // Save the new user in the database
     const createdUser = await UsersDatabase.create(newUser);
+
+    // Generate token (assuming uuidv4 exists)
     const token = uuidv4();
-    sendWelcomeEmail({ to: email,otp, token });
+
+    // Send welcome email
+    sendWelcomeEmail({ to: email, otp, token });
     userRegisteration({ name, email });
 
     return res.status(201).json({
-      
-      code: "Ok", data: createdUser,
-     data: createdUser,
-      otp: otp, // OTP in the response
-      otpExpiration: otpExpiration, });
+      code: "Ok",
+      data: createdUser,
+      otp: otp, // Return OTP in the response
+      otpExpiration: otpExpiration,
+    });
+
   } catch (error) {
-    console.error("Error:", error.message);
+    console.error("Error during registration:", error.message);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
     });
   }
 });
+
 
 router.post("/register/validate", async (req, res) => {
   const {email}=req.body
