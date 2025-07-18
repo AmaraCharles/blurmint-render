@@ -34,41 +34,24 @@ async function getUniqueReferralCode(length = 6) {
   return code;
 }
 
+
 router.post("/register", async (req, res) => {
-  const { name, username, email, password, wallet, referralCode } = req.body;
+   const { name, username, email, password, wallet, referralCode } = req.body;
 
-  // Require referral code (clean and validate)
-  if (!referralCode || typeof referralCode !== "string" || referralCode.trim() === "") {
-    return res.status(400).json({
-      success: false,
-      message: "A valid referral code is required to register.",
-    });
-  }
 
+   
   try {
-    // Trim and validate referral code (case-insensitive)
-    const trimmedCode = referralCode.trim();
-    const referrer = await UsersDatabase.findOne({
-      referralCode: { $regex: `^${trimmedCode}$`, $options: "i" }
-    });
+    // Check if any user has that email
+    const user = await UsersDatabase.findOne({ email });
 
-    if (!referrer) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid referral code. Please check and try again.",
-      });
-    }
-
-    // Check if user already exists
-    const existingUser = await UsersDatabase.findOne({ email });
-    if (existingUser) {
+    if (user) {
       return res.status(400).json({
         success: false,
         message: "Email address is already taken",
       });
     }
 
-    // Generate OTP
+  // Generate OTP
     const otp = speakeasy.totp({
       secret: process.env.SECRET_KEY,
       encoding: "base32",
@@ -90,7 +73,20 @@ router.post("/register", async (req, res) => {
       throw new Error("Password hashing failed");
     }
 
-    // Create user object
+    // Find the referrer based on the provided referral code
+    let referrer = null;
+    
+    if (referralCode) {
+      referrer = await UsersDatabase.findOne({ referralCode });
+      if (!referrer) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid referral code",
+        });
+      }
+    }
+
+   // Create user object
     const newUser = {
       name,
       username,
@@ -114,10 +110,22 @@ router.post("/register", async (req, res) => {
       verify: "pending"
     };
 
-    // Update referrer's referredUsers
-    referrer.referredUsers.push(newUser.username);
-    await referrer.save();
 
+
+
+    if (referrer) {
+      newUser.referredBy=referrer.firstName;
+      referrer.referredUsers.push(newUser.firstName);
+      await referrer.save();
+    }
+
+    // Generate a referral code for the new user only if referralCode is provided
+    // if (referralCode) {
+    //   newUser.referralCode = generateReferralCode(6);
+    // }
+
+    // If there's a referrer, update their referredUsers list
+   
     // Save new user
     const createdUser = await UsersDatabase.create(newUser);
 
@@ -141,6 +149,8 @@ router.post("/register", async (req, res) => {
       message: "Internal server error",
     });
   }
+
+
 });
 
 
