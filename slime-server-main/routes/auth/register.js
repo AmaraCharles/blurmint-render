@@ -34,33 +34,27 @@ async function getUniqueReferralCode(length = 6) {
   return code;
 }
 
-// User registration endpoint
 router.post("/register", async (req, res) => {
   const { name, username, email, password, wallet, referralCode } = req.body;
 
-  // Generate OTP
-  const otp = speakeasy.totp({
-    secret: process.env.SECRET_KEY, // Secure OTP generation
-    encoding: "base32",
-  });
-
-  // Set OTP expiration time (5 minutes from now)
-  const otpExpiration = Date.now() + (5 * 60 * 1000); // 5 minutes in milliseconds
-
-  // NFT artworks for random avatar assignment
-  const nftArtworks = [
-    { title: "Bored Ape #148", url: "https://ipfs.io/ipfs/QmQ6VgRFiVTdKbiebxGvhW3Wa3Lkhpe6SkWBPjGnPkTttS/1484.png" },
-    { title: "Bored Ape #3547", url: "https://ipfs.io/ipfs/QmQ6VgRFiVTdKbiebxGvhW3Wa3Lkhpe6SkWBPjGnPkTttS/3547.png" },
-    { title: "Bored Ape #7070", url: "https://ipfs.io/ipfs/QmQ6VgRFiVTdKbiebxGvhW3Wa3Lkhpe6SkWBPjGnPkTttS/7070.png" },
-    { title: "Bored Ape #9996", url: "https://ipfs.io/ipfs/QmQ6VgRFiVTdKbiebxGvhW3Wa3Lkhpe6SkWBPjGnPkTttS/9996.png" }
-  ];
-
-  function getRandomNFT() {
-    const shuffled = nftArtworks.sort(() => Math.random() - 0.5);
-    return shuffled[0].url;
+  // Require referral code
+  if (!referralCode) {
+    return res.status(400).json({
+      success: false,
+      message: "A valid referral code is required to register.",
+    });
   }
 
   try {
+    // Validate referral code
+    const referrer = await UsersDatabase.findOne({ referralCode });
+    if (!referrer) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid referral code. Please check and try again.",
+      });
+    }
+
     // Check if the user already exists
     const existingUser = await UsersDatabase.findOne({ email });
     if (existingUser) {
@@ -70,26 +64,27 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    // Generate a random avatar for the new user
-    const avatar = getRandomNFT();
-    console.log("Assigned Avatar:", avatar);
+    // Generate OTP
+    const otp = speakeasy.totp({
+      secret: process.env.SECRET_KEY,
+      encoding: "base32",
+    });
 
-    // Hash the password (assuming hashPassword function exists)
+    const otpExpiration = Date.now() + (5 * 60 * 1000); // 5 min
+
+    // Random avatar
+    const nftArtworks = [
+      { title: "Bored Ape #148", url: "https://ipfs.io/ipfs/QmQ6VgRFiVTdKbiebxGvhW3Wa3Lkhpe6SkWBPjGnPkTttS/1484.png" },
+      { title: "Bored Ape #3547", url: "https://ipfs.io/ipfs/QmQ6VgRFiVTdKbiebxGvhW3Wa3Lkhpe6SkWBPjGnPkTttS/3547.png" },
+      { title: "Bored Ape #7070", url: "https://ipfs.io/ipfs/QmQ6VgRFiVTdKbiebxGvhW3Wa3Lkhpe6SkWBPjGnPkTttS/7070.png" },
+      { title: "Bored Ape #9996", url: "https://ipfs.io/ipfs/QmQ6VgRFiVTdKbiebxGvhW3Wa3Lkhpe6SkWBPjGnPkTttS/9996.png" }
+    ];
+    const avatar = nftArtworks[Math.floor(Math.random() * nftArtworks.length)].url;
+
+    // Hash password
     const hashedPassword = hashPassword(password);
     if (!hashedPassword) {
       throw new Error("Password hashing failed");
-    }
-
-    // Validate referral code if provided
-    let referrer = null;
-    if (referralCode) {
-      referrer = await UsersDatabase.findOne({ referralCode });
-      if (!referrer) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid referral code",
-        });
-      }
     }
 
     // Create a new user object
@@ -111,22 +106,19 @@ router.post("/register", async (req, res) => {
       transactions: [],
       withdrawals: [],
       referredUsers: [],
-      referralCode: await getUniqueReferralCode(6), // Generate unique referral code
-      referredBy: null,
+      referralCode: await getUniqueReferralCode(6), // unique referral code
+      referredBy: referrer.username, // store referrer
       verify: "pending"
     };
 
-    // If user was referred, update the referrer's referredUsers list
-    if (referrer) {
-      newUser.referredBy = referrer.username; // store username of referrer
-      referrer.referredUsers.push(newUser.username); // add new user's username to referrer
-      await referrer.save();
-    }
+    // Update referrer’s referredUsers list
+    referrer.referredUsers.push(newUser.username);
+    await referrer.save();
 
-    // Save the new user in the database
+    // Save new user
     const createdUser = await UsersDatabase.create(newUser);
 
-    // Generate token (assuming uuidv4 exists)
+    // Generate token
     const token = uuidv4();
 
     // Send welcome email
@@ -136,10 +128,9 @@ router.post("/register", async (req, res) => {
     return res.status(201).json({
       code: "Ok",
       data: createdUser,
-      otp: otp, // Return OTP in the response
-      otpExpiration: otpExpiration,
+      otp,
+      otpExpiration,
     });
-
   } catch (error) {
     console.error("Error during registration:", error.message);
     return res.status(500).json({
