@@ -38,7 +38,7 @@ router.post("/register", async (req, res) => {
   const { name, username, email, password, wallet, referralCode } = req.body;
 
   // Require referral code (clean and validate)
-  if (!referralCode || typeof referralCode !== "string" || referralCode.trim() === "") {
+  if (!referralCode || typeof referralCode !== "string" || referralCode.trim() == "") {
     return res.status(400).json({
       success: false,
       message: "A valid referral code is required to register.",
