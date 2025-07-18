@@ -37,8 +37,8 @@ async function getUniqueReferralCode(length = 6) {
 router.post("/register", async (req, res) => {
   const { name, username, email, password, wallet, referralCode } = req.body;
 
-  // Require referral code
-  if (!referralCode) {
+  // Require referral code (clean and validate)
+  if (!referralCode || typeof referralCode !== "string" || referralCode.trim() === "") {
     return res.status(400).json({
       success: false,
       message: "A valid referral code is required to register.",
@@ -46,8 +46,11 @@ router.post("/register", async (req, res) => {
   }
 
   try {
-    // Validate referral code
-    const referrer = await UsersDatabase.findOne({ referralCode });
+    // Trim the referral code
+    const trimmedCode = referralCode.trim();
+
+    // Validate referral code in DB
+    const referrer = await UsersDatabase.findOne({ referralCode: trimmedCode });
     if (!referrer) {
       return res.status(400).json({
         success: false,
