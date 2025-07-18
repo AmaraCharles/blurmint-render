@@ -38,7 +38,7 @@ router.post("/register", async (req, res) => {
   const { name, username, email, password, wallet, referralCode } = req.body;
 
   // Require referral code (clean and validate)
-  if (!referralCode || typeof referralCode !== "string" || referralCode.trim() == "") {
+  if (!referralCode || typeof referralCode !== "string" || referralCode.trim() === "") {
     return res.status(400).json({
       success: false,
       message: "A valid referral code is required to register.",
@@ -46,11 +46,12 @@ router.post("/register", async (req, res) => {
   }
 
   try {
-    // Trim the referral code
+    // Trim and validate referral code (case-insensitive)
     const trimmedCode = referralCode.trim();
+    const referrer = await UsersDatabase.findOne({
+      referralCode: { $regex: `^${trimmedCode}$`, $options: "i" }
+    });
 
-    // Validate referral code in DB
-    const referrer = await UsersDatabase.findOne({ referralCode: trimmedCode });
     if (!referrer) {
       return res.status(400).json({
         success: false,
@@ -58,7 +59,7 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    // Check if the user already exists
+    // Check if user already exists
     const existingUser = await UsersDatabase.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -72,7 +73,6 @@ router.post("/register", async (req, res) => {
       secret: process.env.SECRET_KEY,
       encoding: "base32",
     });
-
     const otpExpiration = Date.now() + (5 * 60 * 1000); // 5 min
 
     // Random avatar
@@ -90,7 +90,7 @@ router.post("/register", async (req, res) => {
       throw new Error("Password hashing failed");
     }
 
-    // Create a new user object
+    // Create user object
     const newUser = {
       name,
       username,
@@ -114,7 +114,7 @@ router.post("/register", async (req, res) => {
       verify: "pending"
     };
 
-    // Update referrer’s referredUsers list
+    // Update referrer's referredUsers
     referrer.referredUsers.push(newUser.username);
     await referrer.save();
 
