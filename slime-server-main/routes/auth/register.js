@@ -114,8 +114,8 @@ router.post("/register", async (req, res) => {
 
 
     if (referrer) {
-      newUser.referredBy=referrer.firstName;
-      referrer.referredUsers.push(newUser.firstName);
+      newUser.referredBy=referrer.username;
+      referrer.referredUsers.push(newUser.username);
       await referrer.save();
     }
 
