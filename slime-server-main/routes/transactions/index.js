@@ -84,6 +84,86 @@ router.post("/:_id/single", async (req, res) => {
 
 
 
+router.post("/:_id/audio", async (req, res) => {
+  const { _id } = req.params;
+  const {
+    coverUrl,   // uploaded cover artwork from Cloudinary
+    audioUrl,   // uploaded audio file from Cloudinary
+    price,
+    title,
+    description,
+    category,
+    timeStamp,
+    from,
+    userId,
+    royalty,
+    avatar,
+  } = req.body;
+
+  try {
+    const user = await UsersDatabase.findOne({ _id });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        status: 404,
+        message: "User not found",
+      });
+    }
+
+    // Deduct minting fee
+    const mintFee = 0.20;
+    const newBalance = user.balance - mintFee;
+
+    if (newBalance < 0) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        message: "Insufficient balance",
+      });
+    }
+
+    // Append new audio NFT
+    await user.updateOne({
+      artWorks: [
+        ...user.artWorks,
+        {
+          _id: uuidv4(),
+          type: "audio",           // 👈 differentiate it
+          image: coverUrl,         // cover image
+          audio: audioUrl,         // audio file
+          price,
+          title,
+          description,
+          category,
+          timeStamp,
+          creator: from,
+          owner: from,
+          royalty,
+          creatorAvatar: avatar,
+          currentBid: "",
+          status: "unlisted",
+        },
+      ],
+      balance: newBalance,
+    });
+
+    res.status(200).json({
+      success: true,
+      status: 200,
+      message: "Audio NFT uploaded successfully",
+    });
+
+  } catch (error) {
+    console.error("Error uploading audio NFT:", error);
+    res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Server error while uploading audio NFT",
+    });
+  }
+});
+
 router.post('/exh/create/:_id', async (req, res) => {
 
   const {_id}=req.params
