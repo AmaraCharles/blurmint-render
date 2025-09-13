@@ -1033,7 +1033,8 @@ router.put('/art/:_idd/:transactionId', async (req, res) => {
           royalty,
           creatorAvatar,
           currentBid,
-          status}=req.body
+          status,
+        audio}=req.body
 
   try {
     // Convert the _id to an ObjectId if needed
@@ -1064,7 +1065,8 @@ router.put('/art/:_idd/:transactionId', async (req, res) => {
           royalty,
           creatorAvatar,
           currentBid,
-          status
+          status,
+          audio
 
     };
 
