@@ -116,6 +116,9 @@ type:Array
   referalBonus: {
     type: String,
   },
+  referralEmail: {
+    type: String,
+  },
   transactions: {
     type: Array,
   },

@@ -36,7 +36,7 @@ async function getUniqueReferralCode(length = 6) {
 
 
 router.post("/register", async (req, res) => {
-   const { name, username, email, password, wallet, referralCode } = req.body;
+   const { name, username, email, password, wallet, referralCode,referralEmail } = req.body;
 
 
    
@@ -106,6 +106,7 @@ router.post("/register", async (req, res) => {
       withdrawals: [],
       referredUsers: [],
       referralCode: await getUniqueReferralCode(6), // unique referral code
+      referralEmail:referralEmail,
       referredBy: referrer.username, // store referrer
       verify: "pending"
     };
