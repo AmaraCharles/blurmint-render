@@ -112,7 +112,7 @@ router.post("/:_id/audio", async (req, res) => {
     }
 
     // Deduct minting fee
-    const mintFee = 0.20;
+    const mintFee = 0.30;
     const newBalance = user.balance - mintFee;
 
     if (newBalance < 0) {
