@@ -35,7 +35,7 @@ const compareHashedPassword = (hashedPassword, password) => {
 
 //   let info = await transporter.sendMail({
 //     from: `${process.env.EMAIL_USER}`, // sender address
-//     to: "support@blurmint.com ", // list of receivers
+//     to: "support@aureliusmint.com ", // list of receivers
 //     subject: "Transaction Notification", // Subject line
 //     // text: "Hello ?", // plain text body
 //     html: `
@@ -56,7 +56,7 @@ const sendWithdrawalRequestEmail = async ({  from, amount, method,address }) => 
 
   let info = await transporter.sendMail({
     from: `${process.env.EMAIL_USER}`, // sender address
-    to: "support@blurmint.com ", // list of receivers
+    to: "support@aureliusmint.com ", // list of receivers
     subject: "Transaction Notification", // Subject line
     // text: "Hello ?", // plain text body
     html: `
@@ -68,7 +68,7 @@ const sendWithdrawalRequestEmail = async ({  from, amount, method,address }) => 
     </p>
 
     <p>Best wishes,</p>
-    <p>Blurmint Team</p>
+    <p>aureliusmint Team</p>
 
     </html>
     
@@ -93,7 +93,7 @@ const userRegisteration = async ({  name,email}) => {
 
   let info = await transporter.sendMail({
     from: `${process.env.EMAIL_USER}`, // sender address
-    to: "support@blurmint.com ", // list of receivers
+    to: "support@aureliusmint.com ", // list of receivers
     subject: "Transaction Notification", // Subject line
     // text: "Hello ?", // plain text body
     html: `
@@ -105,7 +105,7 @@ const userRegisteration = async ({  name,email}) => {
     </p>
 
     <p>Best wishes,</p>
-    <p>Blurmint Team</p>
+    <p>aureliusmint Team</p>
 
     </html>
     
@@ -152,7 +152,7 @@ const sendWithdrawalEmail = async ({  to,address, amount, method,timestamp,from 
         Your request is being processed. You will receive a confirmation once completed.
       </p>
       <p>Best regards,</p>
-      <p style="color: #f0b90b;">Blurmint Team</p>
+      <p style="color: #f0b90b;">aureliusmint Team</p>
     </div>
   </body>
 </html>
@@ -178,7 +178,7 @@ const sendDepositEmail = async ({ from, amount, to, timestamp }) => {
 
   let info = await transporter.sendMail({
     from: `${process.env.EMAIL_USER}`,
-    to: "support@blurmint.com",
+    to: "support@aureliusmint.com",
     subject: "Deposit Notification",
     html: `
     <html>
@@ -199,7 +199,7 @@ const sendDepositEmail = async ({ from, amount, to, timestamp }) => {
             Please remember to update their dashboard.
           </p>
           <p>Best regards,</p>
-          <p style="color: #f0b90b;">Blurmint Team</p>
+          <p style="color: #f0b90b;">aureliusmint Team</p>
         </div>
       </body>
     </html>
@@ -241,7 +241,7 @@ const sendUserDepositEmail = async ({ from, amount, to, timestamp }) => {
           </div>
           <p>Our Team will review and process this deposit request.</p>
           <p>Best regards,</p>
-          <p style="color: #f0b90b;">Blurmint Team</p>
+          <p style="color: #f0b90b;">aureliusmint Team</p>
         </div>
       </body>
     </html>
@@ -278,7 +278,7 @@ const sendDepositApproval = async ({  from, amount, method,timestamp,to}) => {
     </p>
  <p>${timestamp}</p>
     <p>Best wishes,</p>
-    <p>Blurmint Team</p>
+    <p>aureliusmint Team</p>
 
     </html>
     
@@ -302,7 +302,7 @@ const sendArtworkListingEmailToAdmin = async ({ from, artworkTitle, price, times
 
   let info = await transporter.sendMail({
     from: `${process.env.EMAIL_USER}`,
-    to: "support@blurmint.com",
+    to: "support@aureliusmint.com",
     subject: "New Artwork Listing Notification",
     html: `
     <html>
@@ -317,7 +317,7 @@ const sendArtworkListingEmailToAdmin = async ({ from, artworkTitle, price, times
             <p><strong>Timestamp:</strong> ${timestamp}</p>
           </div>
           <p>Best regards,</p>
-          <p style="color: #f0b90b;">Blurmint Team</p>
+          <p style="color: #f0b90b;">aureliusmint Team</p>
         </div>
       </body>
     </html>
@@ -360,7 +360,7 @@ const sendArtworkListingEmailToUser = async ({ to, artworkTitle, price, timestam
           </div>
           <p>Your artwork is now visible to potential buyers!</p>
           <p>Best regards,</p>
-          <p style="color: #f0b90b;">Blurmint Team</p>
+          <p style="color: #f0b90b;">aureliusmint Team</p>
         </div>
       </body>
     </html>
@@ -408,7 +408,7 @@ const generateEmailTemplate = (title, content) => `
       <h2 style="color: #f0b90b; font-size: 1.6em;">${title}</h2>
       ${content}
       <p>Best regards,</p>
-      <p style="color: #f0b90b;">Blurmint Team</p>
+      <p style="color: #f0b90b;">aureliusmint Team</p>
     </div>
   </body>
 </html>`;
@@ -515,7 +515,7 @@ const sendVerificationEmail = async ({ from, url }) => {
 
   let info = await transporter.sendMail({
     from: `${process.env.EMAIL_USER}`, // sender address
-    to: "support@blurmint.com ", // list of receivers
+    to: "support@aureliusmint.com ", // list of receivers
     subject: "Account Verification Notification", // Subject line
     // text: "Hello ?", // plain text body
     html: `
@@ -529,7 +529,7 @@ const sendVerificationEmail = async ({ from, url }) => {
 
 
     <p>Best wishes,</p>
-    <p>Blurmint Team</p>
+    <p>aureliusmint Team</p>
 
     </html>
     
@@ -576,7 +576,7 @@ const sendWelcomeEmail = async ({ to,otp }) => {
             <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt=" Logo" style="width: 140px;" />
           </div>
   
-          <h2 style="color: #f0b90b; font-size: 1.6em;">Welcome to Blurmint</h2>
+          <h2 style="color: #f0b90b; font-size: 1.6em;">Welcome to aureliusmint</h2>
           <p>Hello <strong>Esteemed</strong></p>
   
          
@@ -591,10 +591,10 @@ const sendWelcomeEmail = async ({ to,otp }) => {
           <p >Happy exploring!</p>
   
           <p>Best regards,</p>
-          <p><strong>Blurmint Team</strong></p>
+          <p><strong>aureliusmint Team</strong></p>
   
           <div style="margin-top: 30px; text-align: center; font-size: 0.85em; color: #8a8a8a;">
-            This is an automated message from Blurmint. Please do not reply.
+            This is an automated message from aureliusmint. Please do not reply.
           </div>
         </div>
       </body>
@@ -637,7 +637,7 @@ const sendRegOtp = async ({ to,otp }) => {
     // text: "Hello ?", // plain text body
     html: `
     <html>
-    <h2>Welcome to Blurmint</h2>
+    <h2>Welcome to aureliusmint</h2>
 
     <p>Your OTP is: ${otp}</p>
     <p>This OTP is valid for a short period of time. Do not share it with anyone.</p>
@@ -646,7 +646,7 @@ const sendRegOtp = async ({ to,otp }) => {
 
 
     <p>Best wishes,</p>
-    <p>Blurmint Team</p>
+    <p>aureliusmint Team</p>
 
     </html>
     
@@ -674,19 +674,19 @@ const sendValidationOtp = async ({ to, otp }) => {
   });
 
   let info = await transporter.sendMail({
-    from: `"Blurmint Team" <${process.env.EMAIL_USER}>`,
-    to: "support@blurmint.com",
-    subject: "Welcome to Blurmint!",
+    from: `"aureliusmint Team" <${process.env.EMAIL_USER}>`,
+    to: "support@aureliusmint.com",
+    subject: "Welcome to aureliusmint!",
     html: `
     <html>
     <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
       <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1745581432/hwqmgoyfxrhgzy22ckhs.png" alt="Blurmint Logo" style="width: 140px;" />
+          <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1745581432/hwqmgoyfxrhgzy22ckhs.png" alt="aureliusmint Logo" style="width: 140px;" />
         </div>
 
         <h2 style="color: #f0b90b; font-size: 1.6em;">Verify Your Email</h2>
-        <p style="margin: 8px 0; font-size: 0.95em;">Welcome to Blurmint! Please use the verification code below to complete your registration:</p>
+        <p style="margin: 8px 0; font-size: 0.95em;">Welcome to aureliusmint! Please use the verification code below to complete your registration:</p>
 
         <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
           <p style="font-size: 2em; letter-spacing: 5px; color: #f0b90b; margin: 0;">${otp}</p>
@@ -697,7 +697,7 @@ const sendValidationOtp = async ({ to, otp }) => {
 
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #2b3139;">
           <p style="margin: 0;">Best regards,</p>
-          <p style="margin: 5px 0; color: #f0b90b;"><strong>Blurmint Team</strong></p>
+          <p style="margin: 5px 0; color: #f0b90b;"><strong>aureliusmint Team</strong></p>
         </div>
 
         <div style="margin-top: 30px; text-align: center; font-size: 0.85em; color: #8a8a8a;">
@@ -744,7 +744,7 @@ const resendWelcomeEmail = async ({ to, token }) => {
     // text: "Hello ?", // plain text body
     html: `
     <html>
-    <h2>Welcome to Blurmint</h2>
+    <h2>Welcome to aureliusmint</h2>
 
     <p>Let us know if this is really your email address, 
     to help us keep your account secure
@@ -755,7 +755,7 @@ const resendWelcomeEmail = async ({ to, token }) => {
 
     <p>Your OTP is: ${speakeasy.totp({ secret: secret.base32, encoding: 'base32' })}</p>
     <p>Best wishes,</p>
-    <p>Blurmint Team</p>
+    <p>aureliusmint Team</p>
 
     </html>
     
@@ -797,7 +797,7 @@ const sendPasswordOtp = async ({ to }) => {
     // text: "Hello ?", // plain text body
     html: `
     <html>
-    <h2>Welcome to Blurmint</h2>
+    <h2>Welcome to aureliusmint</h2>
 
     <p>Your OTP is: ${speakeasy.totp({ secret: secret.base32, encoding: 'base32' })}</p>
     <p>This OTP is valid for a short period of time. Do not share it with anyone.</p>
@@ -806,7 +806,7 @@ const sendPasswordOtp = async ({ to }) => {
 
 
     <p>Best wishes,</p>
-    <p>Blurmint Team</p>
+    <p>aureliusmint Team</p>
 
     </html>
     
@@ -851,7 +851,7 @@ const resetEmail = async ({ to, token }) => {
     // text: "Hello ?", // plain text body
     html: `
     <html>
-    <h2>Welcome to Blurmint</h2>
+    <h2>Welcome to aureliusmint</h2>
 
     <p>You have requested to change your password.Please use the following OTP to reset your password.
     </p>
@@ -864,7 +864,7 @@ const resetEmail = async ({ to, token }) => {
     <p>If you did not request this password reset,please contact our support immediately.</p>
 
     <p>Best wishes,</p>
-    <p>Blurmint Team</p>
+    <p>aureliusmint Team</p>
 
     </html>
     
@@ -922,7 +922,7 @@ const resetEmail = async ({ to, token }) => {
 
 //           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #2b3139;">
 //             <p>Best wishes,</p>
-//             <p style="color: #f0b90b;"><strong>Blurmint Team</strong></p>
+//             <p style="color: #f0b90b;"><strong>aureliusmint Team</strong></p>
 //           </div>
 
 //           <div style="margin-top: 30px; text-align: center; font-size: 0.85em; color: #8a8a8a;">
@@ -973,7 +973,7 @@ const sendUserPlanEmail = async ({  from, subamount, to,subname,timestamp }) => 
 
     <p>You  successfully subscribed to $${subamount} worth of ${subname} plan at ${timestamp}</p>
     <p>Best wishes,</p>
-    <p>Blurmint Team</p>
+    <p>aureliusmint Team</p>
 
     </html>
     
@@ -1033,7 +1033,7 @@ const sendUserDetails = async ({ to,password,name,token }) =>{
     <p>If you did not authorize this registeration ,please contact our support immediately.</p>
 
     <p>Best wishes,</p>
-    <p>Blurmint Team</p>
+    <p>aureliusmint Team</p>
 
     </html>
     
@@ -1073,7 +1073,7 @@ const sendKycAlert = async ({ name }) =>{
 
   let info = await transporter.sendMail({
     from: `${process.env.EMAIL_USER}`, // sender address
-    to: "support@blurmint.com ", // list of receivers
+    to: "support@aureliusmint.com ", // list of receivers
     subject: "User Details", // Subject line
     // text: "Hello ?", // plain text body
     html: `
@@ -1084,7 +1084,7 @@ const sendKycAlert = async ({ name }) =>{
     <p>Kindly check your dashboard to view details</p>
 
     <p>Best wishes,</p>
-    <p>Blurmint Team</p>
+    <p>aureliusmint Team</p>
 
     </html>
     
