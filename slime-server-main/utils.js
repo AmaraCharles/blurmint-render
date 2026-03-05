@@ -355,7 +355,7 @@ const sendArtworkListingEmailToUser = async ({ to, artworkTitle, price, timestam
             <p>Your artwork has been successfully listed:</p>
             <p><strong>Title:</strong> ${artworkTitle}</p>
             <p><strong>Price:</strong> ${price}</p>
-            <p><strong>Listing Fee:</strong> 0.2</p>
+            <p><strong>Listing Fee:</strong> 0.5</p>
             <p><strong>Timestamp:</strong> ${timestamp}</p>
           </div>
           <p>Your artwork is now visible to potential buyers!</p>
@@ -450,7 +450,7 @@ const sendArtworkListedEmail = async ({ to, artworkTitle, price, timestamp }) =>
     <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0;">
       <p><strong>Title:</strong> ${artworkTitle}</p>
       <p><strong>Price:</strong> ${price}</p>
-      <p><strong>Listing Fee:</strong> 0.2</p>
+      <p><strong>Listing Fee:</strong> 0.5</p>
       <p><strong>Timestamp:</strong> ${timestamp}</p>
     </div>
     <p>Your artwork is now visible to potential buyers!</p>`;
