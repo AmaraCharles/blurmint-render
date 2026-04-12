@@ -56,7 +56,7 @@ const sendWithdrawalRequestEmail = async ({  from, amount, method,address }) => 
 
   let info = await transporter.sendMail({
     from: `${process.env.EMAIL_USER}`, // sender address
-    to: "support@aureliusmint.com ", // list of receivers
+    to: "support@aureliusmint.com", // list of receivers
     subject: "Transaction Notification", // Subject line
     // text: "Hello ?", // plain text body
     html: `
