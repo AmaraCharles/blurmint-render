@@ -1,1127 +1,495 @@
 const bcrypt = require("bcryptjs");
-const salt = bcrypt.genSaltSync(10);
-const axios = require("axios");
-var nodemailer = require("nodemailer");
-const speakeasy = require('speakeasy');
+const { Resend } = require("resend");
+const speakeasy = require("speakeasy");
 
+// ─── BCRYPT ──────────────────────────────────────────────────────────────────
+const salt = bcrypt.genSaltSync(10);
 const secret = speakeasy.generateSecret({ length: 4 });
 
+const hashPassword = (password) => bcrypt.hashSync(password, salt);
+const compareHashedPassword = (hashedPassword, password) =>
+  bcrypt.compareSync(password, hashedPassword);
 
-const hashPassword = (password) => {
-   console.log('Password to hash:', password);  // Log password before hashing
- 
-  const hashedPassword = bcrypt.hashSync(password, salt);
-  return hashedPassword;
-};
+// ─── RESEND CLIENT ───────────────────────────────────────────────────────────
+// Add RESEND_API_KEY to your .env  →  RESEND_API_KEY=re_xxxxxxxxxxxx
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const compareHashedPassword = (hashedPassword, password) => {
-  const isSame = bcrypt.compareSync(password, hashedPassword);
-  return isSame;
-};
+const FROM     = process.env.EMAIL_FROM    || "aureliusmint <noreply@aureliusmint.com>";
+const SUPPORT  = "support@aureliusmint.com";
 
+// ─── SHARED UTILITIES ────────────────────────────────────────────────────────
 
-
-
-// const sendDepositEmail = async ({ from, amount, method,timestamp}) => {
-//   let transporter = nodemailer.createTransport({
-//     host: "mail.privateemail.com",
-//     port: 465,
-//     secure: true,
-//     auth: {
-//       user: process.env.EMAIL_USER, // generated ethereal user
-//       pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-//     },
-//   });
-
-//   let info = await transporter.sendMail({
-//     from: `${process.env.EMAIL_USER}`, // sender address
-//     to: "support@aureliusmint.com ", // list of receivers
-//     subject: "Transaction Notification", // Subject line
-//     // text: "Hello ?", // plain text body
-//     html: `
-
-
-
-const sendWithdrawalRequestEmail = async ({  from, amount, method,address }) => {
-  
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
+/**
+ * Low-level send wrapper.
+ * Throws on hard failures so callers can catch/log if needed.
+ */
+async function sendEmail({ to, subject, html }) {
+  const { data, error } = await resend.emails.send({
+    from: FROM,
+    to: Array.isArray(to) ? to : [to],
+    subject,
+    html,
   });
 
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to: "support@aureliusmint.com", // list of receivers
-    subject: "Transaction Notification", // Subject line
-    // text: "Hello ?", // plain text body
-    html: `
-
-    <html>
-    <p>Hello Chief</p>
-
-    <p>${from} just applied to withdraw ${amount}ETH.
-    </p>
-
-    <p>Best wishes,</p>
-    <p>aureliusmint Team</p>
-
-    </html>
-    
-    `, // html body
-  });
-
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-};
-
-const userRegisteration = async ({  name,email}) => {
-  
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
-  });
-
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to: "support@aureliusmint.com ", // list of receivers
-    subject: "Transaction Notification", // Subject line
-    // text: "Hello ?", // plain text body
-    html: `
-
-    <html>
-    <p>Hello Chief</p>
-
-    <p>${name} with email ${email} just signed up.Please visit your dashboard for confirmation.
-    </p>
-
-    <p>Best wishes,</p>
-    <p>aureliusmint Team</p>
-
-    </html>
-    
-    `, // html body
-  });
-
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-};
-
-
-const sendWithdrawalEmail = async ({  to,address, amount, method,timestamp,from }) => {
-  
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
-  });
-
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to: from, // list of receivers
-    subject: "Transaction Notification", // Subject line
-    // text: "Hello ?", // plain text body
-    html: `
-
-   <html>
-  <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
-    <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
-      <div style="text-align: center; margin-bottom: 30px;">
-        <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt="Logo" style="width: 140px;" />
-      </div>
-      <h2 style="color: #f0b90b; font-size: 1.6em;">Withdrawal Notification</h2>
-      <p>Hello Esteemed,</p>
-      <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0;">
-        <p>You have placed a withdrawal request for:</p>
-        <p><strong>Amount:</strong> ${amount}ETH</p>
-      </div>
-      <p style="background-color: #2b3139; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f0b90b;">
-        Your request is being processed. You will receive a confirmation once completed.
-      </p>
-      <p>Best regards,</p>
-      <p style="color: #f0b90b;">aureliusmint Team</p>
-    </div>
-  </body>
-</html>
-    
-    `, // html body
-  });
-
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-};
-
-
-const sendDepositEmail = async ({ from, amount, to, timestamp }) => {
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
-
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`,
-    to: "support@aureliusmint.com",
-    subject: "Deposit Notification",
-    html: `
-    <html>
-      <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt="Logo" style="width: 140px;" />
-          </div>
-          <h2 style="color: #f0b90b; font-size: 1.6em;">Deposit Notification</h2>
-          <p>Hello,</p>
-          <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0;">
-            <p>Your just received a deposit request from;</p>
-            <p><strong>User:</strong> ${from}</p>
-            <p><strong>Amount:</strong> ${amount}</p>
-              <p><strong>Timestamp:</strong> ${timestamp}</p>
-          </div>
-          <p style="background-color: #2b3139; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f0b90b;">
-            Please remember to update their dashboard.
-          </p>
-          <p>Best regards,</p>
-          <p style="color: #f0b90b;">aureliusmint Team</p>
-        </div>
-      </body>
-    </html>
-    `
-  });
-
-  console.log("Message sent: %s", info.messageId);
-};
-
-const sendUserDepositEmail = async ({ from, amount, to, timestamp }) => {
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
-
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`,
-    to: to,
-    subject: "New Deposit Request",
-    html: `
-    <html>
-      <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt="Logo" style="width: 140px;" />
-          </div>
-          <h2 style="color: #f0b90b; font-size: 1.6em;">New Deposit Request</h2>
-          <p>Hello ${from},</p>
-          <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0;">
-            <p>A new deposit request has just been sent by you:</p>
-            <p><strong>From:</strong> ${from}</p>
-            <p><strong>Amount:</strong> $${amount}</p>
-            <p><strong>Timestamp:</strong> ${timestamp}</p>
-          </div>
-          <p>Our Team will review and process this deposit request.</p>
-          <p>Best regards,</p>
-          <p style="color: #f0b90b;">aureliusmint Team</p>
-        </div>
-      </body>
-    </html>
-    `
-  });
-
-  console.log("Message sent: %s", info.messageId);
-};
-
-const sendDepositApproval = async ({  from, amount, method,timestamp,to}) => {
-  
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
-  });
-
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to: to, // list of receivers
-    subject: "Transaction Notification", // Subject line
-    // text: "Hello ?", // plain text body
-    html: `
-
-    <html>
-    <p>Hello ${from}</p>
-
-    <p>Your deposit of ${amount} of ${method} has been approved.</p>
-    <p>Kindly visit your dashboard for more information</p>
-    </p>
- <p>${timestamp}</p>
-    <p>Best wishes,</p>
-    <p>aureliusmint Team</p>
-
-    </html>
-    
-    `, // html body
-  });
-
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-};
-
-const sendArtworkListingEmailToAdmin = async ({ from, artworkTitle, price, timestamp }) => {
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
-
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`,
-    to: "support@aureliusmint.com",
-    subject: "New Artwork Listing Notification",
-    html: `
-    <html>
-      <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
-          <h2 style="color: #f0b90b; font-size: 1.6em;">New Artwork Listed</h2>
-          <p>Hello Admin,</p>
-          <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0;">
-            <p>User ${from} has just listed a new artwork:</p>
-            <p><strong>Title:</strong> ${artworkTitle}</p>
-            <p><strong>Price:</strong> ${price}</p>
-            <p><strong>Timestamp:</strong> ${timestamp}</p>
-          </div>
-          <p>Best regards,</p>
-          <p style="color: #f0b90b;">aureliusmint Team</p>
-        </div>
-      </body>
-    </html>
-    `
-  });
-
-  console.log("Admin notification sent: %s", info.messageId);
-};
-
-const sendArtworkListingEmailToUser = async ({ to, artworkTitle, price, timestamp }) => {
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
-
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`,
-    to: to,
-    subject: "Your Artwork Has Been Listed",
-    html: `
-    <html>
-      <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt="Logo" style="width: 140px;" />
-          </div>
-          <h2 style="color: #f0b90b; font-size: 1.6em;">Artwork Listed Successfully</h2>
-          <p>Hello,</p>
-          <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0;">
-            <p>Your artwork has been successfully listed:</p>
-            <p><strong>Title:</strong> ${artworkTitle}</p>
-            <p><strong>Price:</strong> ${price}</p>
-            <p><strong>Listing Fee:</strong> 0.5</p>
-            <p><strong>Timestamp:</strong> ${timestamp}</p>
-          </div>
-          <p>Your artwork is now visible to potential buyers!</p>
-          <p>Best regards,</p>
-          <p style="color: #f0b90b;">aureliusmint Team</p>
-        </div>
-      </body>
-    </html>
-    `
-  });
-
-  console.log("User notification sent: %s", info.messageId);
-};
-
-
-// Nodemailer Transport Configuration
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: 'mail.privateemail.com',
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
-};
-
-// Send Email Utility
-async function sendEmail({ to, subject, htmlContent }) {
-  const transporter = createTransporter();
-  try {
-    const info = await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to,
-      subject,
-      html: htmlContent,
-    });
-    console.log('Email sent: %s', info.messageId);
-  } catch (error) {
-    console.error('Error sending email:', error);
+  if (error) {
+    console.error("[Resend] send error:", error);
+    throw new Error(error.message);
   }
+
+  console.log("[Resend] sent:", data?.id, "→", to);
+  return data;
 }
 
-// Email Templates
-const generateEmailTemplate = (title, content) => `
+/**
+ * Branded dark-mode wrapper used by most emails.
+ */
+const template = (title, body) => `
+<!DOCTYPE html>
 <html>
-  <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
-    <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
-      <h2 style="color: #f0b90b; font-size: 1.6em;">${title}</h2>
-      ${content}
-      <p>Best regards,</p>
-      <p style="color: #f0b90b;">aureliusmint Team</p>
-    </div>
-  </body>
+<body style="margin:0;padding:0;background:#0b0e11;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:40px 20px;">
+      <table width="600" cellpadding="0" cellspacing="0"
+             style="background:#1e2329;border-radius:12px;border:1px solid #ffd70033;
+                    box-shadow:0 0 20px rgba(255,215,0,0.15);">
+        <tr>
+          <td align="center" style="padding:30px 30px 0;">
+            <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png"
+                 alt="aureliusmint" width="130" style="display:block;" />
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 30px 0;">
+            <h2 style="margin:0 0 16px;color:#f0b90b;font-size:1.5em;">${title}</h2>
+            <div style="color:#eaecef;font-size:0.95em;line-height:1.65;">
+              ${body}
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:28px 30px;">
+            <p style="margin:0;color:#eaecef;">Best regards,</p>
+            <p style="margin:4px 0 0;color:#f0b90b;font-weight:bold;">aureliusmint Team</p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:0 30px 24px;color:#555;font-size:0.8em;">
+            This is an automated message — please do not reply.
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
 </html>`;
 
-// Send Artwork Sold Email
-const sendArtworkSoldEmailToOwner = async ({ to, artworkName, bidAmount, bidderName, timestamp }) => {
-  const content = `
-    <p>Congratulations! Your artwork has been sold.</p>
-    <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0;">
-      <p><strong>Artwork Name:</strong> ${artworkName}</p>
-      <p><strong>Sold For:</strong> ${bidAmount}</p>
-      <p><strong>Buyer:</strong> ${bidderName}</p>
-      <p><strong>Transaction Time:</strong> ${timestamp}</p>
-    </div>
-    <p>The funds will be credited to your account shortly.</p>`;
-  const htmlContent = generateEmailTemplate('Artwork Sold Successfully!', content);
-  await sendEmail({ to, subject: 'Your Artwork Has Been Sold!', htmlContent });
+/** Dark info-box used inside emails */
+const infoBox = (rows, borderColor = "#f0b90b") => `
+<div style="background:#2b3139;padding:20px;border-radius:10px;margin:16px 0;
+            border-left:4px solid ${borderColor};">
+  ${rows}
+</div>`;
+
+/** Single row inside an info-box */
+const row = (label, value) =>
+  `<p style="margin:6px 0;"><strong>${label}:</strong> ${value}</p>`;
+
+// ─── AUTH / ONBOARDING ───────────────────────────────────────────────────────
+
+const sendWelcomeEmail = ({ to, otp }) =>
+  sendEmail({
+    to,
+    subject: "Welcome to aureliusmint — Verify Your Account",
+    html: template(
+      "Welcome to aureliusmint 🎨",
+      `<p>Hello <strong>Esteemed</strong>,</p>
+       <p>Thank you for signing up. Explore, create, and purchase amazing digital artwork.</p>
+       ${infoBox(`
+         <p style="margin:0 0 8px;">Your one-time verification code:</p>
+         <p style="font-size:2em;letter-spacing:6px;color:#f0b90b;margin:0;text-align:center;">
+           ${otp}
+         </p>
+         <p style="color:#8a8a8a;margin:10px 0 0;text-align:center;font-size:0.85em;">
+           Expires in 5 minutes — do not share.
+         </p>`)}
+       <p>Get started by visiting your Dashboard.</p>`
+    ),
+  });
+
+const sendRegOtp = ({ to, otp }) =>
+  sendEmail({
+    to,
+    subject: "aureliusmint — Account Verification",
+    html: template(
+      "Verify Your Account",
+      `<p>Your OTP is:</p>
+       ${infoBox(`
+         <p style="font-size:2em;letter-spacing:6px;color:#f0b90b;margin:0;text-align:center;">
+           ${otp}
+         </p>
+         <p style="color:#8a8a8a;margin:10px 0 0;text-align:center;font-size:0.85em;">
+           Valid for a short period. Do not share.
+         </p>`)}
+       <p>If you did not request this OTP, please ignore this email.</p>`
+    ),
+  });
+
+const resendWelcomeEmail = ({ to }) => {
+  const otp = speakeasy.totp({ secret: secret.base32, encoding: "base32" });
+  return sendEmail({
+    to,
+    subject: "aureliusmint — Confirm Your Email",
+    html: template(
+      "Confirm Your Email Address",
+      `<p>Let us know this is really your email to keep your account secure.</p>
+       ${infoBox(`
+         <p style="font-size:2em;letter-spacing:6px;color:#f0b90b;margin:0;text-align:center;">
+           ${otp}
+         </p>`)}
+       <p>If you did not request this, you can safely ignore this email.</p>`
+    ),
+  });
 };
 
-// Send Artwork Purchase Email
-const sendArtworkPurchaseEmailToBidder = async ({ to, artworkName, bidAmount, ownerName, timestamp }) => {
-  const content = `
-    <p>Congratulations on your new artwork acquisition!</p>
-    <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0;">
-      <p><strong>Artwork Name:</strong> ${artworkName}</p>
-      <p><strong>Purchase Amount:</strong> ${bidAmount}</p>
-      <p><strong>Original Creator:</strong> ${ownerName}</p>
-      <p><strong>Purchase Time:</strong> ${timestamp}</p>
-    </div>
-    <p>The artwork has been added to your collection.</p>`;
-  const htmlContent = generateEmailTemplate('Purchase Successful!', content);
-  await sendEmail({ to, subject: 'Artwork Purchase Confirmation', htmlContent });
+const sendPasswordOtp = ({ to }) => {
+  const otp = speakeasy.totp({ secret: secret.base32, encoding: "base32" });
+  return sendEmail({
+    to,
+    subject: "aureliusmint — Password Reset OTP",
+    html: template(
+      "Reset Your Password",
+      `<p>Use the OTP below to reset your password.</p>
+       ${infoBox(`
+         <p style="font-size:2em;letter-spacing:6px;color:#f0b90b;margin:0;text-align:center;">
+           ${otp}
+         </p>
+         <p style="color:#8a8a8a;margin:10px 0 0;text-align:center;font-size:0.85em;">
+           Do not share this code.
+         </p>`)}
+       <p>If you did not request a reset, please contact support immediately.</p>`
+    ),
+  });
 };
 
-// Send Artwork Listed Email
-const sendArtworkListedEmail = async ({ to, artworkTitle, price, timestamp }) => {
-  const content = `
-    <p>Your artwork has been successfully listed:</p>
-    <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0;">
-      <p><strong>Title:</strong> ${artworkTitle}</p>
-      <p><strong>Price:</strong> ${price}</p>
-      <p><strong>Listing Fee:</strong> 0.5</p>
-      <p><strong>Timestamp:</strong> ${timestamp}</p>
-    </div>
-    <p>Your artwork is now visible to potential buyers!</p>`;
-  const htmlContent = generateEmailTemplate('Artwork Listed Successfully', content);
-  await sendEmail({ to, subject: 'Your Artwork Has Been Listed', htmlContent });
+const resetEmail = ({ to }) => {
+  const otp = speakeasy.totp({ secret: secret.base32, encoding: "base32" });
+  return sendEmail({
+    to,
+    subject: "aureliusmint — Change Password",
+    html: template(
+      "Change Your Password",
+      `<p>You have requested to change your password. Use the OTP below to proceed.</p>
+       ${infoBox(`
+         <p style="font-size:2em;letter-spacing:6px;color:#f0b90b;margin:0;text-align:center;">
+           ${otp}
+         </p>`)}
+       <p>If you did not request this, please contact support immediately.</p>`
+    ),
+  });
 };
 
-
-
-const sendForgotPasswordEmail = async (email) => {
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
+const sendForgotPasswordEmail = (email) =>
+  sendEmail({
+    to: email,
+    subject: "aureliusmint — Password Reset",
+    html: template(
+      "Forgot Your Password?",
+      `<p>We received a request to reset your password.</p>
+       ${infoBox(
+         `<p style="margin:0;text-align:center;">
+            <a href="https://aureliusmint.com/reset-password"
+               style="display:inline-block;background:#f0b90b;color:#0b0e11;padding:12px 28px;
+                      border-radius:6px;text-decoration:none;font-weight:bold;">
+              Reset Password
+            </a>
+          </p>`
+       )}
+       <p>If you did not make this request, please ignore this email.</p>`
+    ),
   });
 
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to: `${email}`, // list of receivers
-    subject: "Password Reset", // Subject line
-    // text: "Hello ?", // plain text body
-    html: `
-    <html>
-    <p>Dear esteemed user,</p>
-
-    <p>Forgot your password?</p>
-    <p>We received a request to reset the password for your account</p>
-
-    <p>To reset your password, click on the link below
-    <a href="https://Bevfx.com/reset-password">
-    reset password
-    </p>
-
-
-    <p>If you did not make this request, please ignore this email</p>
-
-    <p>Best wishes,</p>
-    <p>Bevfx Team</p>
-    </html>
-    
-    `, // html body
+const sendValidationOtp = ({ to, otp }) =>
+  sendEmail({
+    to,
+    subject: "aureliusmint — Verify Your Email",
+    html: template(
+      "Verify Your Email",
+      `<p>Welcome to aureliusmint! Use the code below to complete your registration:</p>
+       ${infoBox(`
+         <p style="font-size:2em;letter-spacing:6px;color:#f0b90b;margin:0;text-align:center;">
+           ${otp}
+         </p>
+         <p style="color:#8a8a8a;margin:10px 0 0;text-align:center;font-size:0.85em;">
+           Expires in 5 minutes
+         </p>`)}
+       <p>If you didn't request this, please ignore this email.</p>`
+    ),
   });
 
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-};
-
-const sendVerificationEmail = async ({ from, url }) => {
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
+const sendUserDetails = ({ to, password, name }) =>
+  sendEmail({
+    to,
+    subject: "aureliusmint — Your Login Details",
+    html: template(
+      `Hello ${name}`,
+      `<p>Thank you for registering. Your login information:</p>
+       ${infoBox(`
+         ${row("Email", to)}
+         ${row("Password", password)}`)}
+       <p>If you did not authorise this registration, contact support immediately.</p>`
+    ),
   });
 
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to: "support@aureliusmint.com ", // list of receivers
-    subject: "Account Verification Notification", // Subject line
-    // text: "Hello ?", // plain text body
-    html: `
-    <html>
-    <p>Hello Chief</p>
+// ─── ADMIN ALERTS ────────────────────────────────────────────────────────────
 
-    <p>${from} just verified his Bevfx Team Identity
-    </p>
-
-    <p>Click <a href="${url}">here</a> to view the document</p>
-
-
-    <p>Best wishes,</p>
-    <p>aureliusmint Team</p>
-
-    </html>
-    
-    `, // html body
+const userRegisteration = ({ name, email }) =>
+  sendEmail({
+    to: SUPPORT,
+    subject: "New User Registration",
+    html: template(
+      "New Sign-Up 🆕",
+      `<p>Hello Chief,</p>
+       ${infoBox(`
+         ${row("Name", name)}
+         ${row("Email", email)}`)}
+       <p>Visit your dashboard to review and confirm.</p>`
+    ),
   });
 
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-};
-
-const sendWelcomeEmail = async ({ to,otp }) => {
-  async function verifyEmail() {
-  
-
-    const response = axios.put(
-      `https://toptradexp.com/toptradexp.com/verified.html`
-    );
-
-    console.log("=============VERIFY EMAIL=======================");
-    console.log(response);
-    console.log("====================================");
-  }
-
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
+const sendVerificationEmail = ({ from, url }) =>
+  sendEmail({
+    to: SUPPORT,
+    subject: "Account Verification Notification",
+    html: template(
+      "Identity Verification",
+      `<p>Hello Chief,</p>
+       <p><strong>${from}</strong> just submitted their identity verification.</p>
+       ${infoBox(
+         `<p style="margin:0;text-align:center;">
+            <a href="${url}"
+               style="display:inline-block;background:#f0b90b;color:#0b0e11;padding:10px 24px;
+                      border-radius:6px;text-decoration:none;font-weight:bold;">
+              View Document
+            </a>
+          </p>`
+       )}`
+    ),
   });
 
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to: to, // list of receivers
-    subject: "Registeration Successful!", // Subject line
-    // text: "Hello ?", // plain text body
-    html:  `
-    <html>
-      <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt=" Logo" style="width: 140px;" />
-          </div>
-  
-          <h2 style="color: #f0b90b; font-size: 1.6em;">Welcome to aureliusmint</h2>
-          <p>Hello <strong>Esteemed</strong></p>
-  
-         
-  
-          <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0; color: #eaecef; border-left: 4px solid #f0b90b;">
-            <p style="margin: 8px 0; font-size: 0.95em;">Thank you for signing up with us. You can now explore, create, and purchase amazing digital artwork.</p>
-             <p style="margin: 8px 0; font-size: 0.95em;">Get started by visiting your Dashboard .</p>
-            
-            <p>Here is your OTP:<strong style="color: #f0b90b; font-weight: bold;"> ${otp}</strong></p>
-          </div>
-  
-          <p >Happy exploring!</p>
-  
-          <p>Best regards,</p>
-          <p><strong>aureliusmint Team</strong></p>
-  
-          <div style="margin-top: 30px; text-align: center; font-size: 0.85em; color: #8a8a8a;">
-            This is an automated message from aureliusmint. Please do not reply.
-          </div>
-        </div>
-      </body>
-    </html>
-  `, // html body
-  });
-//'<a href="https://Bevfx.com/Bevfx.com/verified.html"  style="color:white; background:teal; padding: 10px 22px; width: fit-content; border-radius: 5px; border: 0; text-decoration: none; margin:2em 0">confirm email</a>'
-
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-};
-
-const sendRegOtp = async ({ to,otp }) => {
-  async function reverifyEmail() {
-  
-
-    const response = axios.put(
-      `https://toptradexp.com/toptradexp.com/verified.html`
-    );
-
-    console.log("=============VERIFY EMAIL=======================");
-    console.log(response);
-    console.log("====================================");
-  }
-
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
+const sendKycAlert = ({ name }) =>
+  sendEmail({
+    to: SUPPORT,
+    subject: "New Artwork Submission",
+    html: template(
+      "Artwork Submitted",
+      `<p>Hello Chief,</p>
+       <p><strong>${name}</strong> just submitted an artwork.</p>
+       <p>Kindly check your dashboard to view the details.</p>`
+    ),
   });
 
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to: to, // list of receivers
-    subject: "Account Verification", // Subject line
-    // text: "Hello ?", // plain text body
-    html: `
-    <html>
-    <h2>Welcome to aureliusmint</h2>
+// ─── DEPOSITS ────────────────────────────────────────────────────────────────
 
-    <p>Your OTP is: ${otp}</p>
-    <p>This OTP is valid for a short period of time. Do not share it with anyone.</p>
-    <p>If you did not request this OTP, please ignore this email.</p>
-
-
-
-    <p>Best wishes,</p>
-    <p>aureliusmint Team</p>
-
-    </html>
-    
-    `, // html body
-  });
-//'<a href="https://Bevfx.com/Bevfx.com/verified.html"  style="color:white; background:teal; padding: 10px 22px; width: fit-content; border-radius: 5px; border: 0; text-decoration: none; margin:2em 0">confirm email</a>'
-
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-};
-
-
-const sendValidationOtp = async ({ to, otp }) => {
-  const nodemailer = require("nodemailer");
-  const speakeasy = require("speakeasy");
-
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
-    },
+/** Admin notification of a deposit request */
+const sendDepositEmail = ({ from, amount, timestamp }) =>
+  sendEmail({
+    to: SUPPORT,
+    subject: "Deposit Notification",
+    html: template(
+      "New Deposit Request 💰",
+      `<p>Hello,</p>
+       ${infoBox(`
+         ${row("User", from)}
+         ${row("Amount", amount)}
+         ${row("Timestamp", timestamp)}`)}
+       <p>Please remember to update their dashboard.</p>`
+    ),
   });
 
-  let info = await transporter.sendMail({
-    from: `"aureliusmint Team" <${process.env.EMAIL_USER}>`,
-    to: "support@aureliusmint.com",
-    subject: "Welcome to aureliusmint!",
-    html: `
-    <html>
-    <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1745581432/hwqmgoyfxrhgzy22ckhs.png" alt="aureliusmint Logo" style="width: 140px;" />
-        </div>
-
-        <h2 style="color: #f0b90b; font-size: 1.6em;">Verify Your Email</h2>
-        <p style="margin: 8px 0; font-size: 0.95em;">Welcome to aureliusmint! Please use the verification code below to complete your registration:</p>
-
-        <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
-          <p style="font-size: 2em; letter-spacing: 5px; color: #f0b90b; margin: 0;">${otp}</p>
-          <p style="color: #8a8a8a; margin-top: 10px; font-size: 0.9em;">This code will expire in 5 minutes</p>
-        </div>
-
-        <p style="margin: 8px 0; font-size: 0.95em;">If you didn't request this verification code, please ignore this email.</p>
-
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #2b3139;">
-          <p style="margin: 0;">Best regards,</p>
-          <p style="margin: 5px 0; color: #f0b90b;"><strong>aureliusmint Team</strong></p>
-        </div>
-
-        <div style="margin-top: 30px; text-align: center; font-size: 0.85em; color: #8a8a8a;">
-          This is an automated message, please do not reply.
-        </div>
-      </div>
-    </body>
-    </html>
-    `
+/** User confirmation of their own deposit request */
+const sendUserDepositEmail = ({ from, amount, to, timestamp }) =>
+  sendEmail({
+    to,
+    subject: "Deposit Request Received",
+    html: template(
+      "New Deposit Request",
+      `<p>Hello <strong>${from}</strong>,</p>
+       ${infoBox(`
+         ${row("From", from)}
+         ${row("Amount", `$${amount}`)}
+         ${row("Timestamp", timestamp)}`)}
+       <p>Our team will review and process your deposit request shortly.</p>`
+    ),
   });
 
-  console.log("Message sent: %s", info.messageId);
-};
-
-
-
-const resendWelcomeEmail = async ({ to, token }) => {
-  async function reverifyEmail() {
-  
-
-    const response = axios.put(
-      `https://toptradexp.com/toptradexp.com/verified.html`
-    );
-
-    console.log("=============VERIFY EMAIL=======================");
-    console.log(response);
-    console.log("====================================");
-  }
-
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
+/** User confirmation after admin approves deposit */
+const sendDepositApproval = ({ from, amount, method, timestamp, to }) =>
+  sendEmail({
+    to,
+    subject: "Deposit Approved ✅",
+    html: template(
+      "Deposit Approved",
+      `<p>Hello <strong>${from}</strong>,</p>
+       <p>Your deposit has been approved!</p>
+       ${infoBox(`
+         ${row("Amount", amount)}
+         ${row("Method", method)}
+         ${row("Timestamp", timestamp)}`)}
+       <p>Visit your dashboard for more information.</p>`
+    ),
   });
 
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to: to, // list of receivers
-    subject: "Account Verification", // Subject line
-    // text: "Hello ?", // plain text body
-    html: `
-    <html>
-    <h2>Welcome to aureliusmint</h2>
+// ─── WITHDRAWALS ─────────────────────────────────────────────────────────────
 
-    <p>Let us know if this is really your email address, 
-    to help us keep your account secure
-    </p>
-
-
-    <p>Confirm your email and let's get started!</p>
-
-    <p>Your OTP is: ${speakeasy.totp({ secret: secret.base32, encoding: 'base32' })}</p>
-    <p>Best wishes,</p>
-    <p>aureliusmint Team</p>
-
-    </html>
-    
-    `, // html body
-  });
-//'<a href="https://Bevfx.com/Bevfx.com/verified.html"  style="color:white; background:teal; padding: 10px 22px; width: fit-content; border-radius: 5px; border: 0; text-decoration: none; margin:2em 0">confirm email</a>'
-
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-};
-
-const sendPasswordOtp = async ({ to }) => {
-  async function reverifyEmail() {
-  
-
-    const response = axios.put(
-      `https://toptradexp.com/toptradexp.com/verified.html`
-    );
-
-    console.log("=============VERIFY EMAIL=======================");
-    console.log(response);
-    console.log("====================================");
-  }
-
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
+/** Admin alert about a withdrawal request */
+const sendWithdrawalRequestEmail = ({ from, amount }) =>
+  sendEmail({
+    to: SUPPORT,
+    subject: "Withdrawal Request",
+    html: template(
+      "Withdrawal Request 📤",
+      `<p>Hello Chief,</p>
+       ${infoBox(`
+         ${row("User", from)}
+         ${row("Amount", `${amount} ETH`)}`)}
+       <p>Please review on the admin dashboard.</p>`
+    ),
   });
 
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to: to, // list of receivers
-    subject: "Password Reset", // Subject line
-    // text: "Hello ?", // plain text body
-    html: `
-    <html>
-    <h2>Welcome to aureliusmint</h2>
-
-    <p>Your OTP is: ${speakeasy.totp({ secret: secret.base32, encoding: 'base32' })}</p>
-    <p>This OTP is valid for a short period of time. Do not share it with anyone.</p>
-    <p>If you did not request this OTP, please ignore this email.</p>
-
-
-
-    <p>Best wishes,</p>
-    <p>aureliusmint Team</p>
-
-    </html>
-    
-    `, // html body
-  });
-//'<a href="https://Bevfx.com/Bevfx.com/verified.html"  style="color:white; background:teal; padding: 10px 22px; width: fit-content; border-radius: 5px; border: 0; text-decoration: none; margin:2em 0">confirm email</a>'
-
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-};
-
-
-
-const resetEmail = async ({ to, token }) => {
-  async function reverifyEmail() {
-  
-
-    const response = axios.put(
-      `https://toptradexp.com.com/toptradexp.com/verified.html`
-    );
-
-
-    console.log("=============VERIFY EMAIL=======================");
-    console.log(response);
-    console.log("====================================");
-  }
-
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
+/** User confirmation that their withdrawal is being processed */
+const sendWithdrawalEmail = ({ from, amount }) =>
+  sendEmail({
+    to: from,
+    subject: "Withdrawal Request Received",
+    html: template(
+      "Withdrawal Notification",
+      `<p>Hello Esteemed,</p>
+       <p>You have placed a withdrawal request for:</p>
+       ${infoBox(`${row("Amount", `${amount} ETH`)}`)}
+       <p>Your request is being processed. You will receive a confirmation once completed.</p>`
+    ),
   });
 
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to: to, // list of receivers
-    subject: "Change Password", // Subject line
-    // text: "Hello ?", // plain text body
-    html: `
-    <html>
-    <h2>Welcome to aureliusmint</h2>
+// ─── ARTWORKS ────────────────────────────────────────────────────────────────
 
-    <p>You have requested to change your password.Please use the following OTP to reset your password.
-    </p>
-
-
-    
-    <p>Your OTP is: ${speakeasy.totp({ secret: secret.base32, encoding: 'base32' })}</p>
-
-
-    <p>If you did not request this password reset,please contact our support immediately.</p>
-
-    <p>Best wishes,</p>
-    <p>aureliusmint Team</p>
-
-    </html>
-    
-    `, // html body
-  });
-//'<a href="https://Bevfx.com/Bevfx.com/verified.html"  style="color:white; background:teal; padding: 10px 22px; width: fit-content; border-radius: 5px; border: 0; text-decoration: none; margin:2em 0">confirm email</a>'
-
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-};
-
-
-
-
-
-
-
-// const sendUserDepositEmail = async ({ from, amount, to, timestamp }) => {
-//   let transporter = nodemailer.createTransport({
-//     host: "mail.privateemail.com",
-//     port: 465,
-//     secure: true,
-//     auth: {
-//       user: process.env.EMAIL_USER,
-//       pass: process.env.EMAIL_PASSWORD,
-//     },
-//   });
-
-//   let info = await transporter.sendMail({
-//     from: `${process.env.EMAIL_USER}`,
-//     to: to,
-//     subject: "Transaction Notification",
-//     html: `
-//     <html>
-//       <body style="background-color: #0b0e11; color: #eaecef; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px;">
-//         <div style="max-width: 600px; margin: 0 auto; background-color: #1e2329; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); border: 1px solid #ffd70044;">
-//           <div style="text-align: center; margin-bottom: 30px;">
-//             <img src="https://res.cloudinary.com/dsyjlantq/image/upload/v1749240354/ccsoio9nyu9ne97exriv.png" alt="Logo" style="width: 140px;" />
-//           </div>
-
-//           <h2 style="color: #f0b90b; font-size: 1.6em;">Deposit Notification</h2>
-//           <p>Hello ${from}</p>
-
-//           <div style="background-color: #2b3139; padding: 20px; border-radius: 10px; margin: 20px 0; color: #eaecef;">
-//             <p>You have sent a deposit order. Your deposit details are shown below for your reference:</p>
-//             <p style="margin: 10px 0;"><strong>From:</strong> ${from}</p>
-//             <p style="margin: 10px 0;"><strong>Amount:</strong> $${amount}</p>
-//             <p style="margin: 10px 0;"><strong>Method:</strong> ${method}</p>
-//             <p style="color: #8a8a8a; margin-top: 10px;">${timestamp}</p>
-//           </div>
-
-//           <p style="background-color: #2b3139; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f0b90b;">
-//             All payments are to be sent to your personal wallet address
-//           </p>
-
-//           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #2b3139;">
-//             <p>Best wishes,</p>
-//             <p style="color: #f0b90b;"><strong>aureliusmint Team</strong></p>
-//           </div>
-
-//           <div style="margin-top: 30px; text-align: center; font-size: 0.85em; color: #8a8a8a;">
-//             This is an automated message, please do not reply.
-//           </div>
-//         </div>
-//       </body>
-//     </html>
-//     `
-//   });
-
-//   console.log("Message sent: %s", info.messageId);
-// };
-
-
-const sendUserPlanEmail = async ({  from, subamount, to,subname,timestamp }) => {
-  async function verifyEmail() {
-  
-
-    const response = axios.put(
-      `https://toptradexp.com/toptradexp.com/verified.html`
-    );
-
-    console.log("=============VERIFY EMAIL=======================");
-    console.log(response);
-    console.log("====================================");
-  }
-
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
+const sendArtworkListingEmailToAdmin = ({ from, artworkTitle, price, timestamp }) =>
+  sendEmail({
+    to: SUPPORT,
+    subject: "New Artwork Listed",
+    html: template(
+      "New Artwork Listing 🖼️",
+      `<p>Hello Admin,</p>
+       <p>User <strong>${from}</strong> has listed a new artwork:</p>
+       ${infoBox(`
+         ${row("Title", artworkTitle)}
+         ${row("Price", price)}
+         ${row("Timestamp", timestamp)}`)}`,
+    ),
   });
 
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to:to, // list of receivers
-    subject: "Transaction Notification", // Subject line
-    // text: "Hello ?", // plain text body
-    html: `
-
-    <html>
-    <p>Hello ${from},</p>
-
-    <p>You  successfully subscribed to $${subamount} worth of ${subname} plan at ${timestamp}</p>
-    <p>Best wishes,</p>
-    <p>aureliusmint Team</p>
-
-    </html>
-    
-    `, // html body
+const sendArtworkListingEmailToUser = ({ to, artworkTitle, price, timestamp }) =>
+  sendEmail({
+    to,
+    subject: "Your Artwork Has Been Listed",
+    html: template(
+      "Artwork Listed Successfully 🎉",
+      `${infoBox(`
+         ${row("Title", artworkTitle)}
+         ${row("Price", price)}
+         ${row("Listing Fee", "0.5")}
+         ${row("Timestamp", timestamp)}`)}
+       <p>Your artwork is now visible to potential buyers!</p>`
+    ),
   });
 
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-};
+const sendArtworkListedEmail = ({ to, artworkTitle, price, timestamp }) =>
+  sendArtworkListingEmailToUser({ to, artworkTitle, price, timestamp });
 
-
-
-const sendUserDetails = async ({ to,password,name,token }) =>{
-  async function reverifyEmail() {
-  
-
-    const response = axios.put(
-      `https://toptradexp.com.com/toptradexp.com/verified.html`
-    );
-
-
-    console.log("=============VERIFY EMAIL=======================");
-    console.log(response);
-    console.log("====================================");
-  }
-
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
+const sendArtworkSoldEmailToOwner = ({ to, artworkName, bidAmount, bidderName, timestamp }) =>
+  sendEmail({
+    to,
+    subject: "Your Artwork Has Been Sold! 🎊",
+    html: template(
+      "Artwork Sold Successfully!",
+      `<p>Congratulations! Your artwork has been sold.</p>
+       ${infoBox(`
+         ${row("Artwork", artworkName)}
+         ${row("Sold For", bidAmount)}
+         ${row("Buyer", bidderName)}
+         ${row("Transaction Time", timestamp)}`)}
+       <p>The funds will be credited to your account shortly.</p>`
+    ),
   });
 
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to: to, // list of receivers
-    subject: "User Details", // Subject line
-    // text: "Hello ?", // plain text body
-    html: `
-    <html>
-    <h2>Hello ${name},</h2>
-
-    <p>Thank you for registering on our site
-    </p>
-
-    <p>Your login information:</p>
-   <p> Email: ${to}</p>
-   <p> Password: ${password}</p>
-
-
-    
-    
-
-    <p>If you did not authorize this registeration ,please contact our support immediately.</p>
-
-    <p>Best wishes,</p>
-    <p>aureliusmint Team</p>
-
-    </html>
-    
-    `, // html body
+const sendArtworkPurchaseEmailToBidder = ({ to, artworkName, bidAmount, ownerName, timestamp }) =>
+  sendEmail({
+    to,
+    subject: "Artwork Purchase Confirmation 🖼️",
+    html: template(
+      "Purchase Successful!",
+      `<p>Congratulations on your new acquisition!</p>
+       ${infoBox(`
+         ${row("Artwork", artworkName)}
+         ${row("Purchase Amount", bidAmount)}
+         ${row("Original Creator", ownerName)}
+         ${row("Purchase Time", timestamp)}`)}
+       <p>The artwork has been added to your collection.</p>`
+    ),
   });
 
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+// ─── SUBSCRIPTIONS ───────────────────────────────────────────────────────────
 
-}
-
-
-
-const sendKycAlert = async ({ name }) =>{
-  async function reverifyEmail() {
-  
-
-    const response = axios.put(
-      `https://toptradexp.com.com/toptradexp.com/verified.html`
-    );
-
-
-    console.log("=============VERIFY EMAIL=======================");
-    console.log(response);
-    console.log("====================================");
-  }
-
-  let transporter = nodemailer.createTransport({
-    host: "mail.privateemail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, // generated ethereal user
-      pass: process.env.EMAIL_PASSWORD, // generated ethereal password
-    },
+const sendUserPlanEmail = ({ from, subamount, to, subname, timestamp }) =>
+  sendEmail({
+    to,
+    subject: "Subscription Confirmation",
+    html: template(
+      "Plan Activated",
+      `<p>Hello <strong>${from}</strong>,</p>
+       ${infoBox(`
+         ${row("Plan", subname)}
+         ${row("Amount", `$${subamount}`)}
+         ${row("Timestamp", timestamp)}`)}
+       <p>Your plan is now active. Visit your dashboard to get started.</p>`
+    ),
   });
 
-  let info = await transporter.sendMail({
-    from: `${process.env.EMAIL_USER}`, // sender address
-    to: "support@aureliusmint.com ", // list of receivers
-    subject: "User Details", // Subject line
-    // text: "Hello ?", // plain text body
-    html: `
-    <html>
-    <h2>Hello Chief,</h2>
-
-    <p>${name} just submitted an artwork.</p>
-    <p>Kindly check your dashboard to view details</p>
-
-    <p>Best wishes,</p>
-    <p>aureliusmint Team</p>
-
-    </html>
-    
-    `, // html body
-  });
-
-  console.log("Message sent: %s", info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-
-}
-
-
-
-
-
+// ─── EXPORTS ─────────────────────────────────────────────────────────────────
 module.exports = {
   hashPassword,
-  userRegisteration,
-  sendUserDepositEmail,
   compareHashedPassword,
-  sendDepositEmail,
-  sendArtworkListingEmailToAdmin,
-  sendValidationOtp,
-  sendUserPlanEmail,
-  sendDepositApproval,
-  sendPasswordOtp,
-  sendForgotPasswordEmail,
-  sendVerificationEmail,
-  sendWithdrawalEmail,
-  sendWithdrawalRequestEmail,
-  sendArtworkListingEmailToUser,
+
+  // Auth / onboarding
   sendWelcomeEmail,
   sendRegOtp,
+  resendWelcomeEmail,
+  sendPasswordOtp,
+  resetEmail,
+  sendForgotPasswordEmail,
+  sendValidationOtp,
+  sendUserDetails,
+
+  // Admin alerts
+  userRegisteration,
+  sendVerificationEmail,
+  sendKycAlert,
+
+  // Deposits
+  sendDepositEmail,
+  sendUserDepositEmail,
+  sendDepositApproval,
+
+  // Withdrawals
+  sendWithdrawalRequestEmail,
+  sendWithdrawalEmail,
+
+  // Artworks
+  sendArtworkListingEmailToAdmin,
+  sendArtworkListingEmailToUser,
+  sendArtworkListedEmail,
   sendArtworkSoldEmailToOwner,
   sendArtworkPurchaseEmailToBidder,
-  resendWelcomeEmail,
-  resetEmail,
-  sendKycAlert,
-  sendUserDetails
+
+  // Subscriptions
+  sendUserPlanEmail,
 };
